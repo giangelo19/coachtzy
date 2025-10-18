@@ -1,0 +1,330 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CoachTzy - Match History</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="../assets/logo.png" alt="CoachTzy Logo" />
+      </div>
+      <nav>
+        <ul>
+          <li><a href="index.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            Dashboard
+          </a></li>
+          <li><a href="players.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Players
+          </a></li>
+          <li><a href="team.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Team
+          </a></li>
+          <li><a href="match-history.html" class="active">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            Match History
+          </a></li>
+          <li><a href="draft-simulator.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="6"></circle>
+              <circle cx="12" cy="12" r="2"></circle>
+            </svg>
+            Draft Simulator
+          </a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <div class="main-container">
+      <header>
+        <h1>Match History</h1>
+        <div class="header-actions">
+          <button class="btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Match Result
+          </button>
+          <div class="user-profile-container">
+            <div class="user-profile" id="userProfileBtn">
+              <img src="../assets/default_pfp.png" alt="Coach Profile" />
+              <span class="coach-name">Coach L8zn</span>
+            </div>
+            <div class="profile-dropdown" id="profileDropdown">
+              <div class="dropdown-header">
+                <img src="../assets/default_pfp.png" alt="Coach Profile" />
+                <div class="dropdown-user-info">
+                  <span class="dropdown-name">Coach L8zn</span>
+                  <span class="dropdown-email">coach@coachtzy.com</span>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Edit Profile
+              </a>
+              <a href="#" class="dropdown-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Edit Team
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="login.html" class="dropdown-item logout-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="match-history-content">
+        <div class="match-history-table-card">
+          <table class="match-history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Opponent</th>
+                <th>Win/Lose</th>
+                <th>Result</th>
+                <th>Scrim/Tournament</th>
+                <th>Average KDA</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="date-cell">Oct 08</td>
+                <td class="opponent-cell">
+                  <a href="#" class="opponent-link">LNU Falcons</a>
+                </td>
+                <td class="status-cell">
+                  <span class="match-status win">WIN</span>
+                </td>
+                <td class="result-cell">2-0</td>
+                <td class="type-cell">Tournament</td>
+                <td class="kda-cell">6.4</td>
+                <td class="notes-cell">
+                  <button class="btn-notes">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Notes
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="date-cell">Oct 06</td>
+                <td class="opponent-cell">
+                  <a href="#" class="opponent-link">EVSU Eagles</a>
+                </td>
+                <td class="status-cell">
+                  <span class="match-status lose">LOSE</span>
+                </td>
+                <td class="result-cell">0-2</td>
+                <td class="type-cell">Scrim</td>
+                <td class="kda-cell">5.1</td>
+                <td class="notes-cell">
+                  <button class="btn-notes">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Notes
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="date-cell">Oct 05</td>
+                <td class="opponent-cell">
+                  <a href="#" class="opponent-link">VSU Vipers</a>
+                </td>
+                <td class="status-cell">
+                  <span class="match-status win">WIN</span>
+                </td>
+                <td class="result-cell">2-1</td>
+                <td class="type-cell">Tournament</td>
+                <td class="kda-cell">7.2</td>
+                <td class="notes-cell">
+                  <button class="btn-notes">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Notes
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="date-cell">Oct 03</td>
+                <td class="opponent-cell">
+                  <a href="#" class="opponent-link">SSU Seahawks</a>
+                </td>
+                <td class="status-cell">
+                  <span class="match-status win">WIN</span>
+                </td>
+                <td class="result-cell">2-0</td>
+                <td class="type-cell">Scrim</td>
+                <td class="kda-cell">8.5</td>
+                <td class="notes-cell">
+                  <button class="btn-notes">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Notes
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="date-cell">Oct 01</td>
+                <td class="opponent-cell">
+                  <a href="#" class="opponent-link">CPU Panthers</a>
+                </td>
+                <td class="status-cell">
+                  <span class="match-status lose">LOSE</span>
+                </td>
+                <td class="result-cell">1-2</td>
+                <td class="type-cell">Tournament</td>
+                <td class="kda-cell">4.8</td>
+                <td class="notes-cell">
+                  <button class="btn-notes">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Notes
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="date-cell">Sep 28</td>
+                <td class="opponent-cell">
+                  <a href="#" class="opponent-link">LNU Falcons</a>
+                </td>
+                <td class="status-cell">
+                  <span class="match-status win">WIN</span>
+                </td>
+                <td class="result-cell">2-1</td>
+                <td class="type-cell">Scrim</td>
+                <td class="kda-cell">6.9</td>
+                <td class="notes-cell">
+                  <button class="btn-notes">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Notes
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="date-cell">Sep 25</td>
+                <td class="opponent-cell">
+                  <a href="#" class="opponent-link">BU Bulldogs</a>
+                </td>
+                <td class="status-cell">
+                  <span class="match-status win">WIN</span>
+                </td>
+                <td class="result-cell">2-0</td>
+                <td class="type-cell">Tournament</td>
+                <td class="kda-cell">7.8</td>
+                <td class="notes-cell">
+                  <button class="btn-notes">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Notes
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="date-cell">Sep 22</td>
+                <td class="opponent-cell">
+                  <a href="#" class="opponent-link">EVSU Eagles</a>
+                </td>
+                <td class="status-cell">
+                  <span class="match-status lose">LOSE</span>
+                </td>
+                <td class="result-cell">0-2</td>
+                <td class="type-cell">Scrim</td>
+                <td class="kda-cell">3.9</td>
+                <td class="notes-cell">
+                  <button class="btn-notes">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Notes
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+      // Profile Dropdown Toggle
+      document.addEventListener('DOMContentLoaded', function() {
+        const userProfileBtn = document.getElementById('userProfileBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        if (userProfileBtn && profileDropdown) {
+          userProfileBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('show');
+          });
+
+          document.addEventListener('click', function(e) {
+            if (!userProfileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+              profileDropdown.classList.remove('show');
+            }
+          });
+
+          profileDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
