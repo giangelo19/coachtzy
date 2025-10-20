@@ -114,70 +114,198 @@
       </header>
 
       <main class="draft-simulator-content">
-        
-        <!-- Draft Board Card -->
+
+        <!-- Draft Board Container -->
         <div class="draft-teams-container">
           <!-- Red Team -->
           <div class="card draft-board-card team-red">
-            <div class="team-header">
+            <div class="team-header-new">
+              <div class="team-icon-wrapper red">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                  <path d="M2 17l10 5 10-5"></path>
+                  <path d="M2 12l10 5 10-5"></path>
+                </svg>
+              </div>
               <h3>Red Team</h3>
             </div>
-            <div class="draft-row picks-row">
-              <div class="row-label">PICKS</div>
-              <div class="slots-container">
-                <div class="pick-slot filled">
-                  <img src="../assets/default_pfp.png" alt="Pick 1" />
+            
+            <div class="draft-section">
+              <div class="section-title">
+                <span class="title-text">Picks</span>
+                <span class="count-badge">2/5</span>
+              </div>
+              <div class="draft-slots">
+                <div class="draft-slot pick-slot filled">
+                  <img src="../assets/placeholder.jpg" alt="Pick 1" />
+                  <div class="slot-number">1</div>
                 </div>
-                <div class="pick-slot filled">
-                  <img src="../assets/default_pfp.png" alt="Pick 2" />
+                <div class="draft-slot pick-slot filled">
+                  <img src="../assets/placeholder.jpg" alt="Pick 2" />
+                  <div class="slot-number">2</div>
                 </div>
-                <div class="pick-slot empty"></div>
-                <div class="pick-slot empty"></div>
-                <div class="pick-slot empty"></div>
+                <div class="draft-slot pick-slot empty">
+                  <div class="slot-number">3</div>
+                </div>
+                <div class="draft-slot pick-slot empty">
+                  <div class="slot-number">4</div>
+                </div>
+                <div class="draft-slot pick-slot empty">
+                  <div class="slot-number">5</div>
+                </div>
               </div>
             </div>
 
-            <div class="draft-row bans-row">
-              <div class="row-label">BANS</div>
-              <div class="slots-container">
-                <div class="ban-slot filled"></div>
-                <div class="ban-slot filled"></div>
-                <div class="ban-slot filled"></div>
-                <div class="ban-slot empty"></div>
-                <div class="ban-slot empty"></div>
+            <div class="draft-section">
+              <div class="section-title">
+                <span class="title-text">Bans</span>
+                <span class="count-badge">3/5</span>
+              </div>
+              <div class="draft-slots">
+                <div class="draft-slot ban-slot filled">
+                  <img src="../assets/placeholder.jpg" alt="Ban 1" />
+                  <div class="ban-overlay">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="draft-slot ban-slot filled">
+                  <img src="../assets/placeholder.jpg" alt="Ban 2" />
+                  <div class="ban-overlay">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="draft-slot ban-slot filled">
+                  <img src="../assets/placeholder.jpg" alt="Ban 3" />
+                  <div class="ban-overlay">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="draft-slot ban-slot empty"></div>
+                <div class="draft-slot ban-slot empty"></div>
               </div>
             </div>
           </div>
 
           <!-- Blue Team -->
           <div class="card draft-board-card team-blue">
-            <div class="team-header">
+            <div class="team-header-new">
+              <div class="team-icon-wrapper blue">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                  <path d="M2 17l10 5 10-5"></path>
+                  <path d="M2 12l10 5 10-5"></path>
+                </svg>
+              </div>
               <h3>Blue Team</h3>
             </div>
-            <div class="draft-row picks-row">
-              <div class="row-label">PICKS</div>
-              <div class="slots-container">
-                <div class="pick-slot filled">
-                  <img src="../assets/default_pfp.png" alt="Pick 1" />
+            
+            <div class="draft-section">
+              <div class="section-title">
+                <span class="title-text">Picks</span>
+                <span class="count-badge">2/5</span>
+              </div>
+              <div class="draft-slots">
+                <div class="draft-slot pick-slot filled">
+                  <img src="../assets/placeholder.jpg" alt="Pick 1" />
+                  <div class="slot-number">1</div>
                 </div>
-                <div class="pick-slot filled">
-                  <img src="../assets/default_pfp.png" alt="Pick 2" />
+                <div class="draft-slot pick-slot filled">
+                  <img src="../assets/placeholder.jpg" alt="Pick 2" />
+                  <div class="slot-number">2</div>
                 </div>
-                <div class="pick-slot empty"></div>
-                <div class="pick-slot empty"></div>
-                <div class="pick-slot empty"></div>
+                <div class="draft-slot pick-slot empty">
+                  <div class="slot-number">3</div>
+                </div>
+                <div class="draft-slot pick-slot empty">
+                  <div class="slot-number">4</div>
+                </div>
+                <div class="draft-slot pick-slot empty">
+                  <div class="slot-number">5</div>
+                </div>
               </div>
             </div>
 
-            <div class="draft-row bans-row">
-              <div class="row-label">BANS</div>
-              <div class="slots-container">
-                <div class="ban-slot filled"></div>
-                <div class="ban-slot filled"></div>
-                <div class="ban-slot filled"></div>
-                <div class="ban-slot empty"></div>
-                <div class="ban-slot empty"></div>
+            <div class="draft-section">
+              <div class="section-title">
+                <span class="title-text">Bans</span>
+                <span class="count-badge">3/5</span>
               </div>
+              <div class="draft-slots">
+                <div class="draft-slot ban-slot filled">
+                  <img src="../assets/placeholder.jpg" alt="Ban 1" />
+                  <div class="ban-overlay">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="draft-slot ban-slot filled">
+                  <img src="../assets/placeholder.jpg" alt="Ban 2" />
+                  <div class="ban-overlay">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="draft-slot ban-slot filled">
+                  <img src="../assets/placeholder.jpg" alt="Ban 3" />
+                  <div class="ban-overlay">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="draft-slot ban-slot empty"></div>
+                <div class="draft-slot ban-slot empty"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Search and Filter -->
+        <div class="card hero-filter-card">
+          <div class="filter-header">
+            <div class="search-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+              <input type="text" placeholder="Search heroes..." class="hero-search-input" />
+            </div>
+            <div class="role-filters">
+              <button class="role-filter-btn active" data-role="all">
+                <span>All</span>
+              </button>
+              <button class="role-filter-btn" data-role="tank">
+                <img src="../assets/expLane.png" alt="Tank" />
+              </button>
+              <button class="role-filter-btn" data-role="fighter">
+                <img src="../assets/expLane.png" alt="Fighter" />
+              </button>
+              <button class="role-filter-btn" data-role="assassin">
+                <img src="../assets/jungle.png" alt="Assassin" />
+              </button>
+              <button class="role-filter-btn" data-role="mage">
+                <img src="../assets/midLane.png" alt="Mage" />
+              </button>
+              <button class="role-filter-btn" data-role="marksman">
+                <img src="../assets/goldLane.png" alt="Marksman" />
+              </button>
+              <button class="role-filter-btn" data-role="support">
+                <img src="../assets/roam.png" alt="Support" />
+              </button>
             </div>
           </div>
         </div>
