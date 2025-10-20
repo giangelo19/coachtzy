@@ -115,56 +115,206 @@
       <main class="team-content">
         <div class="team-grid">
           
-          <!-- Team Card -->
-          <div class="card team-info-card">
-            <h2>Team</h2>
-            <div class="team-logo-section">
-              <img src="https://via.placeholder.com/120/FF0000/FFFFFF?text=UPTC" alt="UPTC Maroons Logo" class="team-logo" />
-              <div class="team-name">
-                <h3>UPTC Maroons</h3>
-                <span class="team-acronym">(MRN)</span>
+          <!-- Team Profile Card -->
+          <div class="card team-profile-card">
+            <div class="team-banner"></div>
+            <div class="team-profile-content">
+              <div class="team-logo-wrapper">
+                <img src="../assets/logo.png" alt="UPTC Maroons Logo" class="team-logo-large" />
+              </div>
+              <div class="team-info-header">
+                <h2>UPTC Maroons</h2>
+                <span class="team-tag">MRN</span>
+              </div>
+              <div class="team-meta">
+                <div class="meta-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  <span>5 Players</span>
+                </div>
+                <div class="meta-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <span>Est. 2024</span>
+                </div>
+                <div class="meta-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <span>Philippines</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Overall Team Stats Card -->
-          <div class="card team-stats-card">
-            <h2>Overall Team Stats</h2>
-            <div class="stats-grid">
-              <div class="stat-item">
-                <div class="stat-value winrate">40%</div>
-                <div class="stat-label">Winrate</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value kda">10.2</div>
-                <div class="stat-label">Average KDA</div>
-              </div>
+          <!-- Team Statistics Cards -->
+          <div class="card team-stat-card wins-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">12</div>
+              <div class="stat-label">Total Wins</div>
+            </div>
+          </div>
+
+          <div class="card team-stat-card losses-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">18</div>
+              <div class="stat-label">Total Losses</div>
+            </div>
+          </div>
+
+          <div class="card team-stat-card kda-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">10.2</div>
+              <div class="stat-label">Average KDA</div>
+            </div>
+          </div>
+
+          <div class="card team-stat-card winrate-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-orange)" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">40%</div>
+              <div class="stat-label">Winrate</div>
             </div>
           </div>
 
           <!-- Current Roster Card -->
-          <div class="card roster-card">
-            <h2>Current Roster</h2>
-            <div class="roster-grid">
-              <div class="player-profile">
-                <img src="https://via.placeholder.com/64/4A90E2/FFFFFF?text=G" alt="Geloqt" class="player-avatar" />
-                <span class="player-name">Geloqt</span>
+          <div class="card roster-card-new">
+            <div class="card-header">
+              <h2>Current Roster</h2>
+              <span class="roster-count">5 Players</span>
+            </div>
+            <div class="roster-list">
+              <div class="roster-player">
+                <img src="../assets/default_pfp.png" alt="Geloqt" class="roster-avatar" />
+                <div class="roster-player-info">
+                  <span class="roster-player-name">Geloqt</span>
+                  <div class="roster-player-role">
+                    <img src="../assets/midLane.png" alt="Mid Lane" class="roster-role-icon" />
+                    <span>Mid Lane</span>
+                  </div>
+                </div>
+                <div class="roster-stats">
+                  <div class="roster-stat">
+                    <span class="stat-label-small">KDA</span>
+                    <span class="stat-value-small">6.2</span>
+                  </div>
+                  <div class="roster-stat">
+                    <span class="stat-label-small">WR</span>
+                    <span class="stat-value-small success">71%</span>
+                  </div>
+                </div>
               </div>
-              <div class="player-profile">
-                <img src="https://via.placeholder.com/64/50D1AA/FFFFFF?text=S" alt="ShadowX" class="player-avatar" />
-                <span class="player-name">ShadowX</span>
+
+              <div class="roster-player">
+                <img src="../assets/default_pfp.png" alt="ShadowX" class="roster-avatar" />
+                <div class="roster-player-info">
+                  <span class="roster-player-name">ShadowX</span>
+                  <div class="roster-player-role">
+                    <img src="../assets/jungle.png" alt="Jungle" class="roster-role-icon" />
+                    <span>Jungle</span>
+                  </div>
+                </div>
+                <div class="roster-stats">
+                  <div class="roster-stat">
+                    <span class="stat-label-small">KDA</span>
+                    <span class="stat-value-small">5.8</span>
+                  </div>
+                  <div class="roster-stat">
+                    <span class="stat-label-small">WR</span>
+                    <span class="stat-value-small success">68%</span>
+                  </div>
+                </div>
               </div>
-              <div class="player-profile">
-                <img src="https://via.placeholder.com/64/FFA500/FFFFFF?text=M" alt="MoonKnight" class="player-avatar" />
-                <span class="player-name">MoonKnight</span>
+
+              <div class="roster-player">
+                <img src="../assets/default_pfp.png" alt="MoonKnight" class="roster-avatar" />
+                <div class="roster-player-info">
+                  <span class="roster-player-name">MoonKnight</span>
+                  <div class="roster-player-role">
+                    <img src="../assets/expLane.png" alt="Exp Lane" class="roster-role-icon" />
+                    <span>Exp Lane</span>
+                  </div>
+                </div>
+                <div class="roster-stats">
+                  <div class="roster-stat">
+                    <span class="stat-label-small">KDA</span>
+                    <span class="stat-value-small">7.1</span>
+                  </div>
+                  <div class="roster-stat">
+                    <span class="stat-label-small">WR</span>
+                    <span class="stat-value-small success">75%</span>
+                  </div>
+                </div>
               </div>
-              <div class="player-profile">
-                <img src="https://via.placeholder.com/64/FF4757/FFFFFF?text=P" alt="Phoenix" class="player-avatar" />
-                <span class="player-name">Phoenix</span>
+
+              <div class="roster-player">
+                <img src="../assets/default_pfp.png" alt="Phoenix" class="roster-avatar" />
+                <div class="roster-player-info">
+                  <span class="roster-player-name">Phoenix</span>
+                  <div class="roster-player-role">
+                    <img src="../assets/goldLane.png" alt="Gold Lane" class="roster-role-icon" />
+                    <span>Gold Lane</span>
+                  </div>
+                </div>
+                <div class="roster-stats">
+                  <div class="roster-stat">
+                    <span class="stat-label-small">KDA</span>
+                    <span class="stat-value-small">6.5</span>
+                  </div>
+                  <div class="roster-stat">
+                    <span class="stat-label-small">WR</span>
+                    <span class="stat-value-small success">72%</span>
+                  </div>
+                </div>
               </div>
-              <div class="player-profile">
-                <img src="https://via.placeholder.com/64/9C27B0/FFFFFF?text=I" alt="IceBreaker" class="player-avatar" />
-                <span class="player-name">IceBreaker</span>
+
+              <div class="roster-player">
+                <img src="../assets/default_pfp.png" alt="IceBreaker" class="roster-avatar" />
+                <div class="roster-player-info">
+                  <span class="roster-player-name">IceBreaker</span>
+                  <div class="roster-player-role">
+                    <img src="../assets/roam.png" alt="Roam" class="roster-role-icon" />
+                    <span>Roam</span>
+                  </div>
+                </div>
+                <div class="roster-stats">
+                  <div class="roster-stat">
+                    <span class="stat-label-small">KDA</span>
+                    <span class="stat-value-small">4.9</span>
+                  </div>
+                  <div class="roster-stat">
+                    <span class="stat-label-small">WR</span>
+                    <span class="stat-value-small error">62%</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -209,23 +359,22 @@
                   <!-- Area fill -->
                   <polygon
                     fill="url(#teamLineGradient)"
-                    points="0,200 0,120 100,100 200,105 300,145 400,150 500,80 600,85 700,95 700,200"
+                    points="0,200 0,120 116.67,100 233.33,105 350,145 466.67,150 583.33,80 700,95 700,200"
                   />
                   <!-- Line -->
                   <polyline
                     fill="none"
                     stroke="var(--accent-orange)"
                     stroke-width="3"
-                    points="0,120 100,100 200,105 300,145 400,150 500,80 600,85 700,95"
+                    points="0,120 116.67,100 233.33,105 350,145 466.67,150 583.33,80 700,95"
                   />
                   <!-- Data points -->
                   <circle cx="0" cy="120" r="4" fill="var(--accent-orange)"/>
-                  <circle cx="100" cy="100" r="4" fill="var(--accent-orange)"/>
-                  <circle cx="200" cy="105" r="4" fill="var(--accent-orange)"/>
-                  <circle cx="300" cy="145" r="4" fill="var(--accent-orange)"/>
-                  <circle cx="400" cy="150" r="4" fill="var(--accent-orange)"/>
-                  <circle cx="500" cy="80" r="5" fill="var(--accent-orange)" stroke="var(--bg-card)" stroke-width="2"/>
-                  <circle cx="600" cy="85" r="4" fill="var(--accent-orange)"/>
+                  <circle cx="116.67" cy="100" r="4" fill="var(--accent-orange)"/>
+                  <circle cx="233.33" cy="105" r="4" fill="var(--accent-orange)"/>
+                  <circle cx="350" cy="145" r="4" fill="var(--accent-orange)"/>
+                  <circle cx="466.67" cy="150" r="4" fill="var(--accent-orange)"/>
+                  <circle cx="583.33" cy="80" r="5" fill="var(--accent-orange)" stroke="var(--bg-card)" stroke-width="2"/>
                   <circle cx="700" cy="95" r="4" fill="var(--accent-orange)"/>
                 </svg>
                 <div class="chart-x-labels">
