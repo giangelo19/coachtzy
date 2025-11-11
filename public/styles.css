@@ -2798,6 +2798,15 @@ body.login-page {
   box-shadow: 0 0 0 4px rgba(80, 181, 255, 0.1);
 }
 
+/* Field Hint */
+.field-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 /* Password Input Wrapper */
 .password-input-wrapper {
   position: relative;
@@ -2830,6 +2839,21 @@ body.login-page {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 32px;
+  animation: fadeIn 0.3s ease;
+}
+
+#signupOptions {
+  justify-content: flex-start;
+}
+
+#signupOptions .remember-me label a {
+  color: var(--accent-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+#signupOptions .remember-me label a:hover {
+  text-decoration: underline;
 }
 
 .remember-me {
@@ -2892,6 +2916,12 @@ body.login-page {
   transform: translateY(0);
 }
 
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Sign Up Link */
 .signup-link {
   margin-top: 24px;
@@ -2917,7 +2947,22 @@ body.login-page {
   text-decoration: underline;
 }
 
+/* Form Field Animations */
+.form-group {
+  animation: fadeIn 0.3s ease;
+  transition: all 0.3s ease;
+}
+
 /* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes fadeInDown {
   from {
     opacity: 0;

@@ -7,8 +7,11 @@ let isSignupMode = false;
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.querySelector('.login-form-card');
   const usernameInput = document.getElementById('username');
+  const displayNameInput = document.getElementById('displayName');
   const passwordInput = document.getElementById('password');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
   const passwordToggle = document.getElementById('passwordToggle');
+  const confirmPasswordToggle = document.getElementById('confirmPasswordToggle');
   const eyeIcon = document.querySelector('.eye-icon');
   const eyeOffIcon = document.querySelector('.eye-off-icon');
   const signupLink = document.querySelector('.signup-link a');
@@ -16,6 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const subtitle = document.querySelector('.login-subtitle');
   const submitButton = document.querySelector('.login-button');
   const signupText = document.querySelector('.signup-link span');
+  const emailLabel = document.getElementById('emailLabel');
+  const usernameField = document.getElementById('usernameField');
+  const confirmPasswordField = document.getElementById('confirmPasswordField');
+  const loginOptions = document.getElementById('loginOptions');
+  const signupOptions = document.getElementById('signupOptions');
 
   // Create error message element
   function showError(message) {
@@ -87,11 +95,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Password toggle visibility
+  // Password toggle visibility for main password field
   if (passwordToggle) {
     passwordToggle.addEventListener('click', () => {
       const type = passwordInput.type === 'password' ? 'text' : 'password';
       passwordInput.type = type;
+      
+      const eyeIcon = passwordToggle.querySelector('.eye-icon');
+      const eyeOffIcon = passwordToggle.querySelector('.eye-off-icon');
+      
+      if (type === 'password') {
+        eyeIcon.style.display = 'block';
+        eyeOffIcon.style.display = 'none';
+      } else {
+        eyeIcon.style.display = 'none';
+        eyeOffIcon.style.display = 'block';
+      }
+    });
+  }
+
+  // Password toggle visibility for confirm password field
+  if (confirmPasswordToggle) {
+    confirmPasswordToggle.addEventListener('click', () => {
+      const type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
+      confirmPasswordInput.type = type;
+      
+      const eyeIcon = confirmPasswordToggle.querySelector('.eye-icon');
+      const eyeOffIcon = confirmPasswordToggle.querySelector('.eye-off-icon');
       
       if (type === 'password') {
         eyeIcon.style.display = 'block';
@@ -109,23 +139,50 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       isSignupMode = !isSignupMode;
       
+      // Clear any previous messages
+      const existingMsg = document.querySelector('.success-message, .error-message');
+      if (existingMsg) {
+        existingMsg.remove();
+      }
+      
       if (isSignupMode) {
-        // Switch to signup mode
+        // Switch to SIGNUP MODE
         welcomeTitle.textContent = 'Create Account';
         subtitle.textContent = 'Sign up to start using CoachTzy';
         submitButton.textContent = 'SIGN UP';
         signupText.textContent = 'Already have an account?';
         signupLink.textContent = 'Sign In';
-        usernameInput.placeholder = 'Enter your email';
+        emailLabel.textContent = 'Email';
+        usernameInput.placeholder = 'Enter your email address';
+        
+        // Show signup-specific fields
+        usernameField.style.display = 'block';
+        confirmPasswordField.style.display = 'block';
+        signupOptions.style.display = 'block';
+        
+        // Hide login-specific fields
+        loginOptions.style.display = 'none';
       } else {
-        // Switch to login mode
+        // Switch to LOGIN MODE
         welcomeTitle.textContent = 'Welcome Back';
         subtitle.textContent = 'Sign in to continue to CoachTzy';
         submitButton.textContent = 'LOGIN';
         signupText.textContent = "Don't have an account?";
         signupLink.textContent = 'Sign Up';
+        emailLabel.textContent = 'Username or Email';
         usernameInput.placeholder = 'Enter your username or email';
+        
+        // Hide signup-specific fields
+        usernameField.style.display = 'none';
+        confirmPasswordField.style.display = 'none';
+        signupOptions.style.display = 'none';
+        
+        // Show login-specific fields
+        loginOptions.style.display = 'flex';
       }
+      
+      // Clear form
+      loginForm.reset();
     });
   }
 
@@ -155,6 +212,38 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // Additional validation for signup mode
+    if (isSignupMode) {
+      const displayName = displayNameInput.value.trim();
+      const confirmPassword = confirmPasswordInput.value;
+      const agreeTerms = document.getElementById('agreeTerms')?.checked;
+
+      if (!displayName) {
+        showError('Please enter a username');
+        return;
+      }
+
+      if (displayName.length < 3) {
+        showError('Username must be at least 3 characters');
+        return;
+      }
+
+      if (!confirmPassword) {
+        showError('Please confirm your password');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        return;
+      }
+
+      if (!agreeTerms) {
+        showError('Please agree to the Terms & Conditions');
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -162,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // SIGNUP MODE
         console.log('Attempting signup for:', email);
         
-        const username = email.split('@')[0]; // Extract username from email
+        const username = displayNameInput.value.trim() || email.split('@')[0];
         const { user } = await signup(email, password, username);
 
         console.log('Signup successful:', user);
