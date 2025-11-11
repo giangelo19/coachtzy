@@ -1,13 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
+import { SUPABASE_CONFIG } from './config.js'
 
-// Get Supabase credentials from environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// Get Supabase credentials from environment variables or fallback to config
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || SUPABASE_CONFIG.url
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || SUPABASE_CONFIG.anonKey
 
-// Validate environment variables
+// Validate credentials
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables!')
-  console.error('Please check your .env file')
+  console.error('Missing Supabase credentials!')
+  console.error('Please check your .env file or config.js')
+} else {
+  console.log('✅ Supabase configured:', supabaseUrl)
 }
 
 // Create Supabase client

@@ -19,28 +19,18 @@ export async function login(email, password) {
 // Signup function
 export async function signup(email, password, username) {
   try {
-    // Sign up the user
+    // Sign up the user (profile will be created automatically by database trigger)
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          username: username
+          username: username || email.split('@')[0]
         }
       }
     })
     
     if (authError) throw authError
-    
-    // Create profile
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: authData.user.id,
-        username: username
-      })
-    
-    if (profileError) throw profileError
     
     return authData
   } catch (error) {
