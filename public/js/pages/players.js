@@ -54,15 +54,15 @@ async function loadPlayers() {
         if (!players || players.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 40px; color: #666;">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <td colspan="7" style="text-align: center; padding: 60px 40px; color: #95a5a6;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5;">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
                             <div>
-                                <p style="font-size: 18px; font-weight: 600; margin-bottom: 5px;">No players found</p>
-                                <p style="font-size: 14px;">Click "Add Player" to create your first player</p>
+                                <p style="font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #e0e0e0;">No players found</p>
+                                <p style="font-size: 15px; color: #95a5a6;">Click "Add Player" to create your first player</p>
                             </div>
                         </div>
                     </td>
@@ -450,9 +450,18 @@ async function handleAddPlayer(form) {
         btnText.style.display = 'none';
         btnLoading.style.display = 'flex';
 
+        // Get current user
+        const { supabase } = await import('../supabase-client.js');
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+            throw new Error('User not authenticated');
+        }
+
         // Get form data
         const formData = new FormData(form);
         const playerData = {
+            user_id: user.id,
             name: formData.get('playerName').trim(),
             role: formData.get('playerRole'),
             status: formData.get('playerStatus'),
