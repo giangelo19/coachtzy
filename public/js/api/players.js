@@ -11,13 +11,16 @@ export const playersAPI = {
           team:teams(name, acronym),
           player_heroes(
             id,
-            proficiency_level,
             games_played,
+            wins,
+            losses,
             winrate,
+            average_kda,
             hero:heroes(
               id,
               name,
-              role,
+              role1,
+              role2,
               icon
             )
           )
@@ -41,8 +44,19 @@ export const playersAPI = {
           *,
           team:teams(*),
           player_heroes(
-            *,
-            hero:heroes(*)
+            id,
+            games_played,
+            wins,
+            losses,
+            winrate,
+            average_kda,
+            hero:heroes(
+              id,
+              name,
+              role1,
+              role2,
+              icon
+            )
           )
         `)
         .eq('id', id)
@@ -107,16 +121,28 @@ export const playersAPI = {
   },
 
   // Add hero to player
-  async addHero(playerId, heroId, proficiencyLevel = 1) {
+  async addHero(playerId, heroId, stats = {}) {
     try {
       const { data, error } = await supabase
         .from('player_heroes')
         .insert({
           player_id: playerId,
           hero_id: heroId,
-          proficiency_level: proficiencyLevel
+          games_played: stats.games_played || 0,
+          wins: stats.wins || 0,
+          losses: stats.losses || 0,
+          average_kda: stats.average_kda || 0
         })
-        .select()
+        .select(`
+          *,
+          hero:heroes(
+            id,
+            name,
+            role1,
+            role2,
+            icon
+          )
+        `)
         .single()
       
       if (error) throw error

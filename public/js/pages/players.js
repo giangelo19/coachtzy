@@ -1,6 +1,11 @@
 // Players page functionality
 import { supabase } from '../supabase-client.js';
 import { playersAPI } from '../api/players.js';
+import { heroesAPI } from '../api/heroes.js';
+
+// Store selected heroes
+let selectedHeroes = [];
+let allHeroes = [];
 
 // Check authentication
 async function checkAuth() {
@@ -124,12 +129,38 @@ function createPlayerRow(player) {
     statusTd.className = 'status-cell';
     statusTd.innerHTML = `<span class="status-badge ${player.status || 'active'}">${player.status || 'Active'}</span>`;
     
+    // Actions
+    const actionsTd = document.createElement('td');
+    actionsTd.className = 'actions-cell';
+    actionsTd.innerHTML = `
+        <button class="btn-edit" data-player-id="${player.id}" title="Edit Player">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+        </button>
+        <button class="btn-delete" data-player-id="${player.id}" title="Delete Player">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+        </button>
+    `;
+    
     tr.appendChild(nameTd);
     tr.appendChild(roleTd);
     tr.appendChild(heroesTd);
     tr.appendChild(kdaTd);
     tr.appendChild(winrateTd);
     tr.appendChild(statusTd);
+    tr.appendChild(actionsTd);
+    
+    // Add event listeners for action buttons
+    const editBtn = actionsTd.querySelector('.btn-edit');
+    const deleteBtn = actionsTd.querySelector('.btn-delete');
+    
+    editBtn.addEventListener('click', () => openEditModal(player));
+    deleteBtn.addEventListener('click', () => handleDeletePlayer(player.id, player.name));
     
     return tr;
 }
@@ -173,6 +204,138 @@ function createHeroIcons(playerHeroes) {
     return `<div class="hero-icons">${heroHTML}</div>`;
 }
 
+// Load heroes for selection
+async function loadHeroesForSelection() {
+    try {
+        allHeroes = await heroesAPI.getAll();
+        console.log(`Loaded ${allHeroes.length} heroes for selection`);
+    } catch (error) {
+        console.error('Error loading heroes:', error);
+    }
+}
+
+// Setup hero selection
+function setupHeroSelection() {
+    const heroSearch = document.getElementById('heroSearch');
+    const heroSearchResults = document.getElementById('heroSearchResults');
+
+    if (!heroSearch || !heroSearchResults) return;
+
+    // Search heroes
+    heroSearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        
+        if (searchTerm.length === 0) {
+            heroSearchResults.classList.remove('show');
+            return;
+        }
+
+        const filteredHeroes = allHeroes.filter(hero => 
+            hero.name.toLowerCase().includes(searchTerm) &&
+            !selectedHeroes.some(sh => sh.id === hero.id)
+        );
+
+        displayHeroSearchResults(filteredHeroes);
+        heroSearchResults.classList.add('show');
+    });
+
+    // Close search results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!heroSearch.contains(e.target) && !heroSearchResults.contains(e.target)) {
+            heroSearchResults.classList.remove('show');
+        }
+    });
+}
+
+// Display hero search results
+function displayHeroSearchResults(heroes) {
+    const heroSearchResults = document.getElementById('heroSearchResults');
+    
+    if (heroes.length === 0) {
+        heroSearchResults.innerHTML = '<div style="padding: 15px; text-align: center; color: #666;">No heroes found</div>';
+        return;
+    }
+
+    const maxReached = selectedHeroes.length >= 3;
+
+    heroSearchResults.innerHTML = heroes.map(hero => `
+        <div class="hero-result-item ${maxReached ? 'disabled' : ''}" data-hero-id="${hero.id}">
+            <img src="${hero.icon || '/assets/placeholder.jpg'}" alt="${hero.name}" onerror="this.src='/assets/placeholder.jpg'" />
+            <div class="hero-result-info">
+                <div class="hero-result-name">${hero.name}</div>
+                <div class="hero-result-roles">
+                    <span class="hero-result-role-badge">${hero.role1}</span>
+                    ${hero.role2 ? `<span class="hero-result-role-badge">${hero.role2}</span>` : ''}
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Add click handlers
+    heroSearchResults.querySelectorAll('.hero-result-item:not(.disabled)').forEach(item => {
+        item.addEventListener('click', () => {
+            const heroId = item.dataset.heroId;
+            const hero = heroes.find(h => h.id === heroId);
+            if (hero) {
+                addHeroToSelection(hero);
+            }
+        });
+    });
+}
+
+// Add hero to selection
+function addHeroToSelection(hero) {
+    if (selectedHeroes.length >= 3) {
+        showNotification('You can only select up to 3 heroes', 'error');
+        return;
+    }
+
+    if (selectedHeroes.some(h => h.id === hero.id)) {
+        return;
+    }
+
+    selectedHeroes.push(hero);
+    updateSelectedHeroesDisplay();
+    
+    // Clear search
+    document.getElementById('heroSearch').value = '';
+    document.getElementById('heroSearchResults').classList.remove('show');
+}
+
+// Remove hero from selection
+function removeHeroFromSelection(heroId) {
+    selectedHeroes = selectedHeroes.filter(h => h.id !== heroId);
+    updateSelectedHeroesDisplay();
+}
+
+// Update selected heroes display
+function updateSelectedHeroesDisplay() {
+    const container = document.getElementById('selectedHeroes');
+    
+    if (selectedHeroes.length === 0) {
+        container.innerHTML = '<div class="empty-hero-slot">Click below to search and select heroes</div>';
+        return;
+    }
+
+    container.innerHTML = selectedHeroes.map(hero => `
+        <div class="selected-hero-card">
+            <img src="${hero.icon || '/assets/placeholder.jpg'}" alt="${hero.name}" onerror="this.src='/assets/placeholder.jpg'" />
+            <div class="selected-hero-info">
+                <div class="selected-hero-name">${hero.name}</div>
+                <div class="selected-hero-role">${hero.role1}${hero.role2 ? ` / ${hero.role2}` : ''}</div>
+            </div>
+            <button type="button" class="remove-hero-btn" data-hero-id="${hero.id}">×</button>
+        </div>
+    `).join('');
+
+    // Add remove handlers
+    container.querySelectorAll('.remove-hero-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            removeHeroFromSelection(btn.dataset.heroId);
+        });
+    });
+}
+
 // Initialize the page
 async function init() {
     console.log('Players page initializing...');
@@ -183,6 +346,9 @@ async function init() {
     
     console.log('User authenticated:', user.email);
     
+    // Load heroes for selection
+    await loadHeroesForSelection();
+    
     // Load players
     await loadPlayers();
     
@@ -191,6 +357,10 @@ async function init() {
     
     // Set up event listeners
     setupModalEventListeners();
+    setupEditModalEventListeners();
+    
+    // Setup hero selection
+    setupHeroSelection();
 }
 
 // Load teams for the team dropdown
@@ -237,12 +407,16 @@ function setupModalEventListeners() {
         addPlayerBtn.addEventListener('click', () => {
             modal.classList.add('show');
             form.reset();
+            selectedHeroes = [];
+            updateSelectedHeroesDisplay();
         });
     }
 
     // Close modal
     const closeModal = () => {
         modal.classList.remove('show');
+        selectedHeroes = [];
+        updateSelectedHeroesDisplay();
     };
 
     if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
@@ -292,11 +466,27 @@ async function handleAddPlayer(form) {
             throw new Error('Please fill in all required fields');
         }
 
+        // Validate hero selection
+        if (selectedHeroes.length === 0) {
+            throw new Error('Please select at least one main hero');
+        }
+
         console.log('Creating player:', playerData);
 
         // Add player to database
         const newPlayer = await playersAPI.create(playerData);
         console.log('Player created:', newPlayer);
+
+        // Add selected heroes to player
+        for (const hero of selectedHeroes) {
+            await playersAPI.addHero(newPlayer.id, hero.id, {
+                games_played: 0,
+                wins: 0,
+                losses: 0,
+                average_kda: 0
+            });
+        }
+        console.log('Heroes added to player');
 
         // Show success message
         showNotification('Player added successfully!', 'success');
@@ -304,6 +494,8 @@ async function handleAddPlayer(form) {
         // Close modal and reset form
         document.getElementById('addPlayerModal').classList.remove('show');
         form.reset();
+        selectedHeroes = [];
+        updateSelectedHeroesDisplay();
 
         // Reload players table
         await loadPlayers();
@@ -316,6 +508,292 @@ async function handleAddPlayer(form) {
         submitBtn.disabled = false;
         btnText.style.display = 'inline';
         btnLoading.style.display = 'none';
+    }
+}
+
+// Open edit modal with player data
+async function openEditModal(player) {
+    const modal = document.getElementById('editPlayerModal');
+    const form = document.getElementById('editPlayerForm');
+    
+    // Reset and show modal
+    modal.classList.add('show');
+    
+    // Fill form with player data
+    document.getElementById('editPlayerId').value = player.id;
+    document.getElementById('editPlayerName').value = player.name;
+    document.getElementById('editPlayerRole').value = player.role;
+    document.getElementById('editPlayerKDA').value = player.average_kda || '';
+    document.getElementById('editPlayerWinrate').value = player.winrate || '';
+    document.getElementById('editPlayerStatus').value = player.status;
+    document.getElementById('editPlayerTeam').value = player.team_id || '';
+    
+    // Load player's current heroes
+    selectedHeroes = [];
+    if (player.player_heroes && player.player_heroes.length > 0) {
+        selectedHeroes = player.player_heroes.map(ph => ph.hero).filter(h => h);
+    }
+    updateEditSelectedHeroesDisplay();
+    
+    // Setup edit hero selection
+    setupEditHeroSelection();
+}
+
+// Setup hero selection for edit modal
+function setupEditHeroSelection() {
+    const heroSearch = document.getElementById('editHeroSearch');
+    const heroSearchResults = document.getElementById('editHeroSearchResults');
+
+    if (!heroSearch || !heroSearchResults) return;
+
+    // Remove existing listeners
+    const newHeroSearch = heroSearch.cloneNode(true);
+    heroSearch.parentNode.replaceChild(newHeroSearch, heroSearch);
+
+    // Search heroes
+    newHeroSearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        
+        if (searchTerm.length === 0) {
+            heroSearchResults.classList.remove('show');
+            return;
+        }
+
+        const filteredHeroes = allHeroes.filter(hero => 
+            hero.name.toLowerCase().includes(searchTerm) &&
+            !selectedHeroes.some(sh => sh.id === hero.id)
+        );
+
+        displayEditHeroSearchResults(filteredHeroes);
+        heroSearchResults.classList.add('show');
+    });
+
+    // Close search results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!newHeroSearch.contains(e.target) && !heroSearchResults.contains(e.target)) {
+            heroSearchResults.classList.remove('show');
+        }
+    });
+}
+
+// Display hero search results for edit modal
+function displayEditHeroSearchResults(heroes) {
+    const heroSearchResults = document.getElementById('editHeroSearchResults');
+    
+    if (heroes.length === 0) {
+        heroSearchResults.innerHTML = '<div style="padding: 15px; text-align: center; color: #666;">No heroes found</div>';
+        return;
+    }
+
+    const maxReached = selectedHeroes.length >= 3;
+
+    heroSearchResults.innerHTML = heroes.map(hero => `
+        <div class="hero-result-item ${maxReached ? 'disabled' : ''}" data-hero-id="${hero.id}">
+            <img src="${hero.icon || '/assets/placeholder.jpg'}" alt="${hero.name}" onerror="this.src='/assets/placeholder.jpg'" />
+            <div class="hero-result-info">
+                <div class="hero-result-name">${hero.name}</div>
+                <div class="hero-result-roles">
+                    <span class="hero-result-role-badge">${hero.role1}</span>
+                    ${hero.role2 ? `<span class="hero-result-role-badge">${hero.role2}</span>` : ''}
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Add click handlers
+    heroSearchResults.querySelectorAll('.hero-result-item:not(.disabled)').forEach(item => {
+        item.addEventListener('click', () => {
+            const heroId = item.dataset.heroId;
+            const hero = heroes.find(h => h.id === heroId);
+            if (hero) {
+                addHeroToEditSelection(hero);
+            }
+        });
+    });
+}
+
+// Add hero to edit selection
+function addHeroToEditSelection(hero) {
+    if (selectedHeroes.length >= 3) {
+        showNotification('You can only select up to 3 heroes', 'error');
+        return;
+    }
+
+    if (selectedHeroes.some(h => h.id === hero.id)) {
+        return;
+    }
+
+    selectedHeroes.push(hero);
+    updateEditSelectedHeroesDisplay();
+    
+    // Clear search
+    document.getElementById('editHeroSearch').value = '';
+    document.getElementById('editHeroSearchResults').classList.remove('show');
+}
+
+// Update selected heroes display for edit modal
+function updateEditSelectedHeroesDisplay() {
+    const container = document.getElementById('editSelectedHeroes');
+    
+    if (selectedHeroes.length === 0) {
+        container.innerHTML = '<div class="empty-hero-slot">Click below to search and select heroes</div>';
+        return;
+    }
+
+    container.innerHTML = selectedHeroes.map(hero => `
+        <div class="selected-hero-card">
+            <img src="${hero.icon || '/assets/placeholder.jpg'}" alt="${hero.name}" onerror="this.src='/assets/placeholder.jpg'" />
+            <div class="selected-hero-info">
+                <div class="selected-hero-name">${hero.name}</div>
+                <div class="selected-hero-role">${hero.role1}${hero.role2 ? ` / ${hero.role2}` : ''}</div>
+            </div>
+            <button type="button" class="remove-hero-btn" data-hero-id="${hero.id}">×</button>
+        </div>
+    `).join('');
+
+    // Add remove handlers
+    container.querySelectorAll('.remove-hero-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedHeroes = selectedHeroes.filter(h => h.id !== btn.dataset.heroId);
+            updateEditSelectedHeroesDisplay();
+        });
+    });
+}
+
+// Setup edit modal event listeners
+function setupEditModalEventListeners() {
+    const modal = document.getElementById('editPlayerModal');
+    const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const form = document.getElementById('editPlayerForm');
+
+    // Close modal
+    const closeModal = () => {
+        modal.classList.remove('show');
+        selectedHeroes = [];
+        updateEditSelectedHeroesDisplay();
+    };
+
+    if (closeEditModalBtn) closeEditModalBtn.addEventListener('click', closeModal);
+    if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeModal);
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Handle form submission
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleEditPlayer(form);
+        });
+    }
+}
+
+// Handle editing a player
+async function handleEditPlayer(form) {
+    const submitBtn = document.getElementById('submitEditPlayerBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+
+    try {
+        // Show loading state
+        submitBtn.disabled = true;
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'flex';
+
+        const playerId = document.getElementById('editPlayerId').value;
+        const formData = new FormData(form);
+        const playerData = {
+            name: formData.get('playerName').trim(),
+            role: formData.get('playerRole'),
+            status: formData.get('playerStatus'),
+            team_id: formData.get('playerTeam') || null,
+            average_kda: formData.get('playerKDA') ? parseFloat(formData.get('playerKDA')) : null,
+            winrate: formData.get('playerWinrate') ? parseFloat(formData.get('playerWinrate')) : null
+        };
+
+        // Validate required fields
+        if (!playerData.name || !playerData.role || !playerData.status) {
+            throw new Error('Please fill in all required fields');
+        }
+
+        // Validate hero selection
+        if (selectedHeroes.length === 0) {
+            throw new Error('Please select at least one main hero');
+        }
+
+        console.log('Updating player:', playerId, playerData);
+
+        // Update player in database
+        await playersAPI.update(playerId, playerData);
+        
+        // Get current player heroes
+        const player = await playersAPI.getById(playerId);
+        const currentHeroIds = player.player_heroes ? player.player_heroes.map(ph => ph.hero_id) : [];
+        const newHeroIds = selectedHeroes.map(h => h.id);
+        
+        // Remove heroes that are no longer selected
+        for (const ph of (player.player_heroes || [])) {
+            if (!newHeroIds.includes(ph.hero_id)) {
+                await playersAPI.removeHero(ph.id);
+            }
+        }
+        
+        // Add new heroes
+        for (const hero of selectedHeroes) {
+            if (!currentHeroIds.includes(hero.id)) {
+                await playersAPI.addHero(playerId, hero.id, {
+                    games_played: 0,
+                    wins: 0,
+                    losses: 0,
+                    average_kda: 0
+                });
+            }
+        }
+
+        console.log('Player updated successfully');
+
+        // Show success message
+        showNotification('Player updated successfully!', 'success');
+
+        // Close modal and reset form
+        document.getElementById('editPlayerModal').classList.remove('show');
+        form.reset();
+        selectedHeroes = [];
+        updateEditSelectedHeroesDisplay();
+
+        // Reload players table
+        await loadPlayers();
+
+    } catch (error) {
+        console.error('Error updating player:', error);
+        showNotification(error.message || 'Failed to update player. Please try again.', 'error');
+    } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        btnText.style.display = 'inline';
+        btnLoading.style.display = 'none';
+    }
+}
+
+// Handle deleting a player
+async function handleDeletePlayer(playerId, playerName) {
+    if (!confirm(`Are you sure you want to delete "${playerName}"? This action cannot be undone.`)) {
+        return;
+    }
+
+    try {
+        console.log('Deleting player:', playerId);
+        await playersAPI.delete(playerId);
+        showNotification('Player deleted successfully!', 'success');
+        await loadPlayers();
+    } catch (error) {
+        console.error('Error deleting player:', error);
+        showNotification(error.message || 'Failed to delete player. Please try again.', 'error');
     }
 }
 

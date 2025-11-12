@@ -123,6 +123,7 @@
                 <th>Average KDA</th>
                 <th>Winrate</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -319,12 +320,112 @@
             </div>
           </div>
 
+          <!-- Hero Selection -->
+          <div class="form-group full-width">
+            <label>Main Heroes (Select up to 3) *</label>
+            <div class="hero-selection-container">
+              <div class="selected-heroes" id="selectedHeroes">
+                <div class="empty-hero-slot">Click below to search and select heroes</div>
+              </div>
+              <div class="hero-search-wrapper">
+                <input type="text" id="heroSearch" placeholder="Search heroes..." class="hero-search" autocomplete="off" />
+                <div id="heroSearchResults" class="hero-search-results"></div>
+              </div>
+            </div>
+          </div>
+
           <div class="modal-footer">
             <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
             <button type="submit" class="btn-primary" id="submitPlayerBtn">
               <span class="btn-text">Add Player</span>
               <span class="btn-loading" style="display: none;">
                 <span class="spinner"></span> Adding...
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Player Modal -->
+    <div id="editPlayerModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Player</h2>
+          <button class="close-modal" id="closeEditModalBtn">&times;</button>
+        </div>
+        <form id="editPlayerForm" class="modal-body">
+          <input type="hidden" id="editPlayerId" />
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editPlayerName">Player Name *</label>
+              <input type="text" id="editPlayerName" name="playerName" required placeholder="Enter player name" />
+            </div>
+            
+            <div class="form-group">
+              <label for="editPlayerRole">Role *</label>
+              <select id="editPlayerRole" name="playerRole" required>
+                <option value="">Select Role</option>
+                <option value="exp_lane">EXP Lane</option>
+                <option value="jungle">Jungle</option>
+                <option value="mid_lane">Mid Lane</option>
+                <option value="gold_lane">Gold Lane</option>
+                <option value="roam">Roam</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editPlayerKDA">Average KDA</label>
+              <input type="number" id="editPlayerKDA" name="playerKDA" step="0.1" min="0" placeholder="e.g., 5.5" />
+            </div>
+            
+            <div class="form-group">
+              <label for="editPlayerWinrate">Winrate (%)</label>
+              <input type="number" id="editPlayerWinrate" name="playerWinrate" step="0.1" min="0" max="100" placeholder="e.g., 65.5" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editPlayerStatus">Status *</label>
+              <select id="editPlayerStatus" name="playerStatus" required>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="injured">Injured</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="editPlayerTeam">Team</label>
+              <select id="editPlayerTeam" name="playerTeam">
+                <option value="">Loading teams...</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Hero Selection -->
+          <div class="form-group full-width">
+            <label>Main Heroes (Select up to 3) *</label>
+            <div class="hero-selection-container">
+              <div class="selected-heroes" id="editSelectedHeroes">
+                <div class="empty-hero-slot">Click below to search and select heroes</div>
+              </div>
+              <div class="hero-search-wrapper">
+                <input type="text" id="editHeroSearch" placeholder="Search heroes..." class="hero-search" autocomplete="off" />
+                <div id="editHeroSearchResults" class="hero-search-results"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="cancelEditBtn">Cancel</button>
+            <button type="submit" class="btn-primary" id="submitEditPlayerBtn">
+              <span class="btn-text">Update Player</span>
+              <span class="btn-loading" style="display: none;">
+                <span class="spinner"></span> Updating...
               </span>
             </button>
           </div>
