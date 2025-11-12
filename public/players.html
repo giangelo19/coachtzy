@@ -70,15 +70,15 @@
           </button>
           <div class="user-profile-container">
             <div class="user-profile" id="userProfileBtn">
-              <img src="../assets/default_pfp.png" alt="Coach Profile" />
-              <span class="coach-name">Coach L8zn</span>
+              <img src="/assets/default_pfp.png" alt="Coach Profile" id="userProfileImage" />
+              <span class="coach-name" id="userDisplayName">Loading...</span>
             </div>
             <div class="profile-dropdown" id="profileDropdown">
               <div class="dropdown-header">
-                <img src="../assets/default_pfp.png" alt="Coach Profile" />
+                <img src="/assets/default_pfp.png" alt="Coach Profile" id="dropdownProfileImage" />
                 <div class="dropdown-user-info">
-                  <span class="dropdown-name">Coach L8zn</span>
-                  <span class="dropdown-email">coach@coachtzy.com</span>
+                  <span class="dropdown-name" id="dropdownDisplayName">Loading...</span>
+                  <span class="dropdown-email" id="dropdownEmail">Loading...</span>
                 </div>
               </div>
               <div class="dropdown-divider"></div>
@@ -261,6 +261,7 @@
         }
       });
     </script>
-    <script type="module" src="js/pages/players.js"></script>
+    <script type="module" src="/js/load-user-profile.js"></script>
+    <script type="module" src="/js/pages/players.js"></script>
   </body>
 </html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Test - CoachTzy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>🔧 Quick Connection Test</h1>
+        <p>This page will test your Supabase connection and help diagnose issues.</p>
+        
+        <div id="results"></div>
+        
+        <button onclick="runTests()">🚀 Run All Tests</button>
+        <button onclick="location.href='login.html'">📝 Go to Login</button>
+        <button onclick="location.href='auth-test.html'">🧪 Go to Auth Test</button>
+    </div>
+
+    <div class="test-box">
+        <h2>📧 Quick User Creation</h2>
+        <input type="email" id="testEmail" placeholder="Email (e.g., test@example.com)" value="test@coachtzy.com">
+        <input type="password" id="testPassword" placeholder="Password (min 6 chars)" value="test123456">
+        <input type="text" id="testUsername" placeholder="Username" value="TestCoach">
+        <button onclick="quickSignup()">✨ Create Test User</button>
+        <button onclick="quickLogin()">🔑 Login Test User</button>
+    </div>
+
+    <script type="module">
+        // Log to see if script is loading
+        console.log('Script loading...');
+        
+        let supabase, signup, login;
+        
+        try {
+            const supabaseModule = await import('./js/supabase-client.js');
+            supabase = supabaseModule.supabase;
+            console.log('Supabase loaded:', supabase);
+            
+            const authModule = await import('./js/auth.js');
+            signup = authModule.signup;
+            login = authModule.login;
+            console.log('Auth functions loaded');
+            
+            window.supabase = supabase;
+            window.signup = signup;
+            window.login = login;
+        } catch (error) {
+            console.error('Error loading modules:', error);
+            document.getElementById('results').innerHTML = 
+                '<div class="status error">❌ Error loading modules: ' + error.message + '</div>' +
+                '<p>Check the browser console for details.</p>';
+        }
+
+        window.runTests = async function() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="status info">Running tests...</div>';
+            
+            let html = '';
+
+            // Test 1: Check environment variables
+            html += '<h3>Test 1: Environment Variables</h3>';
+            const url = import.meta.env.VITE_SUPABASE_URL;
+            const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+            
+            if (url && key) {
+                html += '<div class="status success">✅ Environment variables loaded</div>';
+                html += '<pre>URL: ' + url + '\nKey: ' + key.substring(0, 20) + '...</pre>';
+            } else {
+                html += '<div class="status error">❌ Environment variables missing</div>';
+                resultsDiv.innerHTML = html;
+                return;
+            }
+
+            // Test 2: Supabase connection
+            html += '<h3>Test 2: Supabase Connection</h3>';
+            try {
+                const { data, error } = await supabase.from('profiles').select('count');
+                if (error) throw error;
+                html += '<div class="status success">✅ Connected to Supabase database</div>';
+            } catch (error) {
+                html += '<div class="status error">❌ Database connection failed: ' + error.message + '</div>';
+                html += '<pre>' + JSON.stringify(error, null, 2) + '</pre>';
+            }
+
+            // Test 3: Check auth
+            html += '<h3>Test 3: Authentication Status</h3>';
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    html += '<div class="status success">✅ User is logged in</div>';
+                    html += '<pre>User ID: ' + session.user.id + '\nEmail: ' + session.user.email + '</pre>';
+                } else {
+                    html += '<div class="status info">ℹ️ No user logged in (this is normal)</div>';
+                }
+            } catch (error) {
+                html += '<div class="status error">❌ Auth check failed: ' + error.message + '</div>';
+            }
+
+            // Test 4: Check if profiles table exists
+            html += '<h3>Test 4: Database Tables</h3>';
+            try {
+                const { data, error } = await supabase.from('profiles').select('*').limit(1);
+                if (error) {
+                    if (error.message.includes('relation') || error.message.includes('does not exist')) {
+                        html += '<div class="status error">❌ Profiles table does not exist!</div>';
+                        html += '<p>You need to run the SQL schema from README_SUPABASE.md</p>';
+                    } else {
+                        throw error;
+                    }
+                } else {
+                    html += '<div class="status success">✅ Profiles table exists</div>';
+                    html += '<p>Found ' + (data ? data.length : 0) + ' profiles</p>';
+                }
+            } catch (error) {
+                html += '<div class="status error">❌ Table check failed: ' + error.message + '</div>';
+            }
+
+            resultsDiv.innerHTML = html;
+        };
+
+        window.quickSignup = async function() {
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+            const username = document.getElementById('testUsername').value;
+
+            if (!email || !password) {
+                alert('Please fill in email and password');
+                return;
+            }
+
+            try {
+                const result = await signup(email, password, username);
+                console.log('Signup result:', result);
+                alert('✅ User created! Check your email for verification.\n\nEmail: ' + email);
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('❌ Signup failed: ' + error.message);
+            }
+        };
+
+        window.quickLogin = async function() {
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+
+            if (!email || !password) {
+                alert('Please fill in email and password');
+                return;
+            }
+
+            try {
+                const result = await login(email, password);
+                console.log('Login result:', result);
+                alert('✅ Login successful!\n\nRedirecting to dashboard...');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('❌ Login failed: ' + error.message);
+            }
+        };
+
+        // Run tests automatically on load
+        setTimeout(() => {
+            runTests();
+        }, 500);
+    </script>
+</body>
+</html>
