@@ -77,3 +77,6 @@ export function onAuthStateChange(callback) {
     callback(event, session)
   })
 }
+
+// Re-export getCurrentUser from supabase-client for convenience
+export { getCurrentUser }

@@ -61,7 +61,7 @@
       <header>
         <h1>Match History</h1>
         <div class="header-actions">
-          <button class="btn-primary">
+          <button class="btn-primary" id="addMatchBtn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -121,184 +121,163 @@
                 <th>Opponent</th>
                 <th>Win/Lose</th>
                 <th>Result</th>
-                <th>Scrim/Tournament</th>
+                <th>Match Type</th>
                 <th>Average KDA</th>
                 <th>Notes</th>
+                <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td class="date-cell">Oct 08</td>
-                <td class="opponent-cell">
-                  <a href="#" class="opponent-link">LNU Falcons</a>
-                </td>
-                <td class="status-cell">
-                  <span class="match-status win">WIN</span>
-                </td>
-                <td class="result-cell">2-0</td>
-                <td class="type-cell">Tournament</td>
-                <td class="kda-cell">6.4</td>
-                <td class="notes-cell">
-                  <button class="btn-notes">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    Notes
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td class="date-cell">Oct 06</td>
-                <td class="opponent-cell">
-                  <a href="#" class="opponent-link">EVSU Eagles</a>
-                </td>
-                <td class="status-cell">
-                  <span class="match-status lose">LOSE</span>
-                </td>
-                <td class="result-cell">0-2</td>
-                <td class="type-cell">Scrim</td>
-                <td class="kda-cell">5.1</td>
-                <td class="notes-cell">
-                  <button class="btn-notes">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    Notes
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td class="date-cell">Oct 05</td>
-                <td class="opponent-cell">
-                  <a href="#" class="opponent-link">VSU Vipers</a>
-                </td>
-                <td class="status-cell">
-                  <span class="match-status win">WIN</span>
-                </td>
-                <td class="result-cell">2-1</td>
-                <td class="type-cell">Tournament</td>
-                <td class="kda-cell">7.2</td>
-                <td class="notes-cell">
-                  <button class="btn-notes">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    Notes
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td class="date-cell">Oct 03</td>
-                <td class="opponent-cell">
-                  <a href="#" class="opponent-link">SSU Seahawks</a>
-                </td>
-                <td class="status-cell">
-                  <span class="match-status win">WIN</span>
-                </td>
-                <td class="result-cell">2-0</td>
-                <td class="type-cell">Scrim</td>
-                <td class="kda-cell">8.5</td>
-                <td class="notes-cell">
-                  <button class="btn-notes">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    Notes
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td class="date-cell">Oct 01</td>
-                <td class="opponent-cell">
-                  <a href="#" class="opponent-link">CPU Panthers</a>
-                </td>
-                <td class="status-cell">
-                  <span class="match-status lose">LOSE</span>
-                </td>
-                <td class="result-cell">1-2</td>
-                <td class="type-cell">Tournament</td>
-                <td class="kda-cell">4.8</td>
-                <td class="notes-cell">
-                  <button class="btn-notes">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    Notes
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td class="date-cell">Sep 28</td>
-                <td class="opponent-cell">
-                  <a href="#" class="opponent-link">LNU Falcons</a>
-                </td>
-                <td class="status-cell">
-                  <span class="match-status win">WIN</span>
-                </td>
-                <td class="result-cell">2-1</td>
-                <td class="type-cell">Scrim</td>
-                <td class="kda-cell">6.9</td>
-                <td class="notes-cell">
-                  <button class="btn-notes">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    Notes
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td class="date-cell">Sep 25</td>
-                <td class="opponent-cell">
-                  <a href="#" class="opponent-link">BU Bulldogs</a>
-                </td>
-                <td class="status-cell">
-                  <span class="match-status win">WIN</span>
-                </td>
-                <td class="result-cell">2-0</td>
-                <td class="type-cell">Tournament</td>
-                <td class="kda-cell">7.8</td>
-                <td class="notes-cell">
-                  <button class="btn-notes">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    Notes
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td class="date-cell">Sep 22</td>
-                <td class="opponent-cell">
-                  <a href="#" class="opponent-link">EVSU Eagles</a>
-                </td>
-                <td class="status-cell">
-                  <span class="match-status lose">LOSE</span>
-                </td>
-                <td class="result-cell">0-2</td>
-                <td class="type-cell">Scrim</td>
-                <td class="kda-cell">3.9</td>
-                <td class="notes-cell">
-                  <button class="btn-notes">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    Notes
-                  </button>
-                </td>
-              </tr>
+            <tbody id="matchTableBody">
+              <!-- Matches will be loaded from database -->
             </tbody>
           </table>
         </div>
       </main>
+
+      <!-- Add Match Modal -->
+      <div id="addMatchModal" class="modal">
+        <div class="modal-content modal-wide">
+          <div class="modal-header">
+            <h2>Add Match Result</h2>
+            <button class="modal-close" id="closeAddMatchModal">&times;</button>
+          </div>
+          <form id="addMatchForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="matchDate">Match Date*</label>
+                <input type="date" id="matchDate" name="matchDate" required />
+              </div>
+              <div class="form-group">
+                <label for="opponentName">Opponent Name*</label>
+                <input type="text" id="opponentName" name="opponentName" placeholder="e.g., LNU Falcons" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Result*</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="result" value="win" required />
+                    <span>Win</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="result" value="loss" required />
+                    <span>Loss</span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="matchType">Match Type*</label>
+                <select id="matchType" name="matchType" required>
+                  <option value="">Select Type</option>
+                  <option value="scrim">Scrim</option>
+                  <option value="tournament">Tournament</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="scoreTeam">Team Score*</label>
+                <input type="number" id="scoreTeam" name="scoreTeam" min="0" max="10" placeholder="0" required />
+              </div>
+              <div class="form-group">
+                <label for="scoreOpponent">Opponent Score*</label>
+                <input type="number" id="scoreOpponent" name="scoreOpponent" min="0" max="10" placeholder="0" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="averageKda">Average Team KDA</label>
+              <input type="number" id="averageKda" name="averageKda" step="0.1" min="0" max="20" placeholder="e.g., 5.4" />
+            </div>
+
+            <div class="form-group">
+              <label for="notes">Notes</label>
+              <textarea id="notes" name="notes" rows="3" placeholder="Add match notes, strategies, observations..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" id="cancelAddMatch">Cancel</button>
+              <button type="submit" class="btn-primary">Add Match</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Edit Match Modal -->
+      <div id="editMatchModal" class="modal">
+        <div class="modal-content modal-wide">
+          <div class="modal-header">
+            <h2>Edit Match Result</h2>
+            <button class="modal-close" id="closeEditMatchModal">&times;</button>
+          </div>
+          <form id="editMatchForm">
+            <input type="hidden" id="editMatchId" />
+            <div class="form-row">
+              <div class="form-group">
+                <label for="editMatchDate">Match Date*</label>
+                <input type="date" id="editMatchDate" name="matchDate" required />
+              </div>
+              <div class="form-group">
+                <label for="editOpponentName">Opponent Name*</label>
+                <input type="text" id="editOpponentName" name="opponentName" placeholder="e.g., LNU Falcons" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Result*</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="editResult" value="win" required />
+                    <span>Win</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="editResult" value="loss" required />
+                    <span>Loss</span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="editMatchType">Match Type*</label>
+                <select id="editMatchType" name="matchType" required>
+                  <option value="">Select Type</option>
+                  <option value="scrim">Scrim</option>
+                  <option value="tournament">Tournament</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="editScoreTeam">Team Score*</label>
+                <input type="number" id="editScoreTeam" name="scoreTeam" min="0" max="10" placeholder="0" required />
+              </div>
+              <div class="form-group">
+                <label for="editScoreOpponent">Opponent Score*</label>
+                <input type="number" id="editScoreOpponent" name="scoreOpponent" min="0" max="10" placeholder="0" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="editAverageKda">Average Team KDA</label>
+              <input type="number" id="editAverageKda" name="averageKda" step="0.1" min="0" max="20" placeholder="e.g., 5.4" />
+            </div>
+
+            <div class="form-group">
+              <label for="editNotes">Notes</label>
+              <textarea id="editNotes" name="notes" rows="3" placeholder="Add match notes, strategies, observations..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" id="cancelEditMatch">Cancel</button>
+              <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <script src="app.js"></script>
@@ -327,6 +306,6 @@
       });
     </script>
     <script type="module" src="/js/load-user-profile.js"></script>
-    <script type="module" src="js/pages/match-history.js"></script>
+    <script type="module" src="/js/pages/match-history.js"></script>
   </body>
 </html>

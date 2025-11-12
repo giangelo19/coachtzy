@@ -15,7 +15,7 @@ export const matchesAPI = {
             hero:heroes(name, icon)
           )
         `)
-        .order('date', { ascending: false })
+        .order('match_date', { ascending: false })
       
       if (error) throw error
       return data
@@ -125,7 +125,7 @@ export const matchesAPI = {
       const { data, error } = await supabase
         .from('matches')
         .select('*')
-        .order('date', { ascending: false })
+        .order('match_date', { ascending: false })
         .limit(limit)
       
       if (error) throw error
@@ -144,8 +144,8 @@ export const matchesAPI = {
       const { data, error } = await supabase
         .from('matches')
         .select('*')
-        .gte('date', today)
-        .order('date', { ascending: true })
+        .gte('match_date', today)
+        .order('match_date', { ascending: true })
       
       if (error) throw error
       return data
