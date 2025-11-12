@@ -1,202 +1,424 @@
 // Players page functionality
-import { requireAuth, getCurrentUser } from '../auth.js';
-import { getAll, create, update, deletePlayer } from '../api/players.js';
+import { supabase } from '../supabase-client.js';
+import { playersAPI } from '../api/players.js';
 
-// Protect this page
-await requireAuth();
+// Check authentication
+async function checkAuth() {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error || !user) {
+        console.log('User not authenticated, redirecting to login...');
+        window.location.href = '/login.html';
+        return null;
+    }
+    
+    return user;
+}
 
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    // Get current user info
-    const user = await getCurrentUser();
-    updateUserProfile(user);
+// Load and display players
+async function loadPlayers() {
+    const tbody = document.querySelector('.players-table tbody');
+    
+    if (!tbody) {
+        console.error('Players table body not found');
+        return;
+    }
 
+    try {
+        // Show loading state
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <div class="loading-spinner"></div>
+                        <span>Loading players...</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        // Fetch players from database
+        console.log('Fetching players from database...');
+        const players = await playersAPI.getAll();
+        console.log('Players loaded:', players);
+
+        // Clear loading state
+        tbody.innerHTML = '';
+
+        // Check if there are players
+        if (!players || players.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #666;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <div>
+                                <p style="font-size: 18px; font-weight: 600; margin-bottom: 5px;">No players found</p>
+                                <p style="font-size: 14px;">Click "Add Player" to create your first player</p>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // Display each player
+        players.forEach(player => {
+            const row = createPlayerRow(player);
+            tbody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error('Error loading players:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px;">
+                    <div style="color: #dc3545;">
+                        <p style="font-weight: 600; margin-bottom: 10px;">❌ Error Loading Players</p>
+                        <p style="font-size: 14px;">${error.message}</p>
+                        <button onclick="location.reload()" style="margin-top: 15px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Retry
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Create a table row for a player
+function createPlayerRow(player) {
+    const tr = document.createElement('tr');
+    
+    // Player Name
+    const nameTd = document.createElement('td');
+    nameTd.className = 'player-name';
+    nameTd.textContent = player.name || 'Unknown Player';
+    
+    // Role
+    const roleTd = document.createElement('td');
+    roleTd.className = 'role-cell';
+    roleTd.innerHTML = createRoleIcon(player.role);
+    
+    // Main Heroes
+    const heroesTd = document.createElement('td');
+    heroesTd.className = 'heroes-cell';
+    heroesTd.innerHTML = createHeroIcons(player.player_heroes);
+    
+    // Average KDA
+    const kdaTd = document.createElement('td');
+    kdaTd.className = 'kda-cell';
+    kdaTd.textContent = player.average_kda ? player.average_kda.toFixed(1) : 'N/A';
+    
+    // Winrate
+    const winrateTd = document.createElement('td');
+    winrateTd.className = 'winrate-cell';
+    winrateTd.textContent = player.winrate ? `${player.winrate.toFixed(0)}%` : 'N/A';
+    
+    // Status
+    const statusTd = document.createElement('td');
+    statusTd.className = 'status-cell';
+    statusTd.innerHTML = `<span class="status-badge ${player.status || 'active'}">${player.status || 'Active'}</span>`;
+    
+    tr.appendChild(nameTd);
+    tr.appendChild(roleTd);
+    tr.appendChild(heroesTd);
+    tr.appendChild(kdaTd);
+    tr.appendChild(winrateTd);
+    tr.appendChild(statusTd);
+    
+    return tr;
+}
+
+// Create role icon HTML
+function createRoleIcon(role) {
+    const roleMap = {
+        'exp_lane': { icon: 'expLane.png', label: 'Exp' },
+        'jungle': { icon: 'jungle.png', label: 'Jungle' },
+        'mid_lane': { icon: 'midLane.png', label: 'Mid' },
+        'gold_lane': { icon: 'goldLane.png', label: 'Gold' },
+        'roam': { icon: 'roam.png', label: 'Roam' }
+    };
+    
+    const roleInfo = roleMap[role] || { icon: 'placeholder.jpg', label: role || 'Unknown' };
+    
+    return `
+        <div class="role-icon-container" title="${roleInfo.label} Lane">
+            <img src="/assets/${roleInfo.icon}" alt="${roleInfo.label}" class="role-icon-img" />
+            <span class="role-label">${roleInfo.label}</span>
+        </div>
+    `;
+}
+
+// Create hero icons HTML
+function createHeroIcons(playerHeroes) {
+    if (!playerHeroes || playerHeroes.length === 0) {
+        return '<div class="hero-icons"><span style="color: #666; font-size: 14px;">No heroes</span></div>';
+    }
+    
+    // Show up to 3 heroes
+    const heroes = playerHeroes.slice(0, 3);
+    const heroHTML = heroes.map(ph => {
+        const hero = ph.hero || {};
+        const iconUrl = hero.icon || '/assets/placeholder.jpg';
+        const heroName = hero.name || 'Unknown';
+        
+        return `<img src="${iconUrl}" alt="${heroName}" class="hero-icon" title="${heroName}" />`;
+    }).join('');
+    
+    return `<div class="hero-icons">${heroHTML}</div>`;
+}
+
+// Initialize the page
+async function init() {
+    console.log('Players page initializing...');
+    
+    // Check authentication first
+    const user = await checkAuth();
+    if (!user) return;
+    
+    console.log('User authenticated:', user.email);
+    
     // Load players
     await loadPlayers();
     
-    // Setup event listeners
-    setupEventListeners();
-  } catch (error) {
-    console.error('Players page initialization error:', error);
-  }
-});
-
-async function loadPlayers() {
-  try {
-    showLoading();
-
-    const players = await getAll();
-    displayPlayers(players);
-
-    hideLoading();
-  } catch (error) {
-    console.error('Error loading players:', error);
-    showError('Failed to load players. Please refresh the page.');
-  }
+    // Load teams for dropdown
+    await loadTeams();
+    
+    // Set up event listeners
+    setupModalEventListeners();
 }
 
-function displayPlayers(players) {
-  const playersGrid = document.querySelector('.players-grid');
-  if (!playersGrid) return;
+// Load teams for the team dropdown
+async function loadTeams() {
+    const teamSelect = document.getElementById('playerTeam');
+    if (!teamSelect) return;
 
-  if (!players || players.length === 0) {
-    playersGrid.innerHTML = '<p class="no-data">No players found. Click "Add Player" to get started.</p>';
-    return;
-  }
-
-  playersGrid.innerHTML = players.map(player => `
-    <div class="player-card" data-player-id="${player.id}">
-      <div class="player-card-header">
-        <img src="${player.profile_picture || '../assets/default_pfp.png'}" alt="${player.name}" class="player-avatar" />
-        <div class="player-status ${player.status || 'active'}">
-          ${player.status === 'active' ? 'Active' : 'Inactive'}
-        </div>
-      </div>
-      <div class="player-card-body">
-        <h3 class="player-name">${player.name}</h3>
-        <div class="player-role">
-          <img src="../assets/${getRoleIcon(player.role)}" alt="${player.role}" class="role-icon" />
-          <span>${formatRole(player.role)}</span>
-        </div>
-        <div class="player-stats-grid">
-          <div class="stat-item">
-            <span class="stat-label">Matches</span>
-            <span class="stat-value">${player.total_matches || 0}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Wins</span>
-            <span class="stat-value">${player.total_wins || 0}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">KDA</span>
-            <span class="stat-value">${(player.average_kda || 0).toFixed(2)}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Winrate</span>
-            <span class="stat-value">${(player.winrate || 0).toFixed(1)}%</span>
-          </div>
-        </div>
-        <div class="player-card-actions">
-          <button class="btn-edit" onclick="editPlayer('${player.id}')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
-            Edit
-          </button>
-          <button class="btn-delete" onclick="confirmDeletePlayer('${player.id}', '${player.name}')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function getRoleIcon(role) {
-  const icons = {
-    'exp_lane': 'expLane.png',
-    'jungle': 'jungle.png',
-    'mid_lane': 'midLane.png',
-    'gold_lane': 'goldLane.png',
-    'roam': 'roam.png'
-  };
-  return icons[role] || 'default_pfp.png';
-}
-
-function formatRole(role) {
-  const roleMap = {
-    'exp_lane': 'EXP Lane',
-    'jungle': 'Jungle',
-    'mid_lane': 'Mid Lane',
-    'gold_lane': 'Gold Lane',
-    'roam': 'Roam'
-  };
-  return roleMap[role] || role;
-}
-
-// Make functions globally available for onclick handlers
-window.editPlayer = function(playerId) {
-  console.log('Edit player:', playerId);
-  // TODO: Open edit modal or navigate to edit page
-  alert('Edit player functionality coming soon!');
-};
-
-window.confirmDeletePlayer = async function(playerId, playerName) {
-  if (confirm(`Are you sure you want to delete ${playerName}?`)) {
     try {
-      await deletePlayer(playerId);
-      alert('Player deleted successfully!');
-      await loadPlayers();
+        const { data: teams, error } = await supabase
+            .from('teams')
+            .select('id, name')
+            .order('name');
+
+        if (error) throw error;
+
+        teamSelect.innerHTML = '<option value="">Select Team (Optional)</option>';
+        
+        if (teams && teams.length > 0) {
+            teams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team.id;
+                option.textContent = team.name;
+                teamSelect.appendChild(option);
+            });
+        } else {
+            teamSelect.innerHTML = '<option value="">No teams available</option>';
+        }
     } catch (error) {
-      console.error('Error deleting player:', error);
-      alert('Failed to delete player. Please try again.');
+        console.error('Error loading teams:', error);
+        teamSelect.innerHTML = '<option value="">Error loading teams</option>';
     }
-  }
-};
-
-function updateUserProfile(user) {
-  const coachNameElements = document.querySelectorAll('.coach-name, .dropdown-name');
-  const coachEmailElements = document.querySelectorAll('.dropdown-email');
-  
-  if (user?.username) {
-    coachNameElements.forEach(el => el.textContent = user.username);
-  }
-  
-  if (user?.email) {
-    coachEmailElements.forEach(el => el.textContent = user.email);
-  }
 }
 
-function setupEventListeners() {
-  // Profile dropdown toggle
-  const userProfileBtn = document.getElementById('userProfileBtn');
-  const profileDropdown = document.getElementById('profileDropdown');
+// Set up modal event listeners
+function setupModalEventListeners() {
+    const modal = document.getElementById('addPlayerModal');
+    const addPlayerBtn = document.querySelector('.btn-primary');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const form = document.getElementById('addPlayerForm');
 
-  if (userProfileBtn && profileDropdown) {
-    userProfileBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      profileDropdown.classList.toggle('show');
+    // Open modal
+    if (addPlayerBtn) {
+        addPlayerBtn.addEventListener('click', () => {
+            modal.classList.add('show');
+            form.reset();
+        });
+    }
+
+    // Close modal
+    const closeModal = () => {
+        modal.classList.remove('show');
+    };
+
+    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
     });
 
-    document.addEventListener('click', () => {
-      profileDropdown.classList.remove('show');
-    });
-  }
-
-  // Add Player button
-  const addPlayerBtn = document.querySelector('.btn-primary');
-  if (addPlayerBtn) {
-    addPlayerBtn.addEventListener('click', () => {
-      // TODO: Open add player modal
-      alert('Add player functionality coming soon!');
-    });
-  }
-
-  // Logout button
-  const logoutBtn = document.querySelector('.dropdown-item[href*="logout"]');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const { logout } = await import('../auth.js');
-      await logout();
-      window.location.href = 'login.html';
-    });
-  }
+    // Handle form submission
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleAddPlayer(form);
+        });
+    }
 }
 
-function showLoading() {
-  console.log('Loading players...');
+// Handle adding a new player
+async function handleAddPlayer(form) {
+    const submitBtn = document.getElementById('submitPlayerBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+
+    try {
+        // Show loading state
+        submitBtn.disabled = true;
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'flex';
+
+        // Get form data
+        const formData = new FormData(form);
+        const playerData = {
+            name: formData.get('playerName').trim(),
+            role: formData.get('playerRole'),
+            status: formData.get('playerStatus'),
+            team_id: formData.get('playerTeam') || null,
+            average_kda: formData.get('playerKDA') ? parseFloat(formData.get('playerKDA')) : null,
+            winrate: formData.get('playerWinrate') ? parseFloat(formData.get('playerWinrate')) : null
+        };
+
+        // Validate required fields
+        if (!playerData.name || !playerData.role || !playerData.status) {
+            throw new Error('Please fill in all required fields');
+        }
+
+        console.log('Creating player:', playerData);
+
+        // Add player to database
+        const newPlayer = await playersAPI.create(playerData);
+        console.log('Player created:', newPlayer);
+
+        // Show success message
+        showNotification('Player added successfully!', 'success');
+
+        // Close modal and reset form
+        document.getElementById('addPlayerModal').classList.remove('show');
+        form.reset();
+
+        // Reload players table
+        await loadPlayers();
+
+    } catch (error) {
+        console.error('Error adding player:', error);
+        showNotification(error.message || 'Failed to add player. Please try again.', 'error');
+    } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        btnText.style.display = 'inline';
+        btnLoading.style.display = 'none';
+    }
 }
 
-function hideLoading() {
-  console.log('Loading complete');
+// Show notification message
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        background: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1'};
+        color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5460'};
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 2000;
+        font-weight: 600;
+        animation: slideInRight 0.3s ease;
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
-function showError(message) {
-  alert(message);
-}
+// Run on page load
+document.addEventListener('DOMContentLoaded', init);
+
+// Add loading spinner styles
+const style = document.createElement('style');
+style.textContent = `
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .hero-icons {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+    
+    .hero-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        object-fit: cover;
+        border: 1px solid #ddd;
+    }
+    
+    .role-icon-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .role-icon-img {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+    }
+    
+    .role-label {
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+    
+    .status-badge.active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-badge.inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-badge.injured {
+        background: #fff3cd;
+        color: #856404;
+    }
+`;
+document.head.appendChild(style);

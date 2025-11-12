@@ -261,6 +261,77 @@
         }
       });
     </script>
+
+    <!-- Add Player Modal -->
+    <div id="addPlayerModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Add New Player</h2>
+          <button class="close-modal" id="closeModalBtn">&times;</button>
+        </div>
+        <form id="addPlayerForm" class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="playerName">Player Name *</label>
+              <input type="text" id="playerName" name="playerName" required placeholder="Enter player name" />
+            </div>
+            
+            <div class="form-group">
+              <label for="playerRole">Role *</label>
+              <select id="playerRole" name="playerRole" required>
+                <option value="">Select Role</option>
+                <option value="exp_lane">EXP Lane</option>
+                <option value="jungle">Jungle</option>
+                <option value="mid_lane">Mid Lane</option>
+                <option value="gold_lane">Gold Lane</option>
+                <option value="roam">Roam</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="playerKDA">Average KDA</label>
+              <input type="number" id="playerKDA" name="playerKDA" step="0.1" min="0" placeholder="e.g., 5.5" />
+            </div>
+            
+            <div class="form-group">
+              <label for="playerWinrate">Winrate (%)</label>
+              <input type="number" id="playerWinrate" name="playerWinrate" step="0.1" min="0" max="100" placeholder="e.g., 65.5" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="playerStatus">Status *</label>
+              <select id="playerStatus" name="playerStatus" required>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="injured">Injured</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="playerTeam">Team</label>
+              <select id="playerTeam" name="playerTeam">
+                <option value="">Loading teams...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
+            <button type="submit" class="btn-primary" id="submitPlayerBtn">
+              <span class="btn-text">Add Player</span>
+              <span class="btn-loading" style="display: none;">
+                <span class="spinner"></span> Adding...
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script type="module" src="/js/load-user-profile.js"></script>
     <script type="module" src="/js/pages/players.js"></script>
   </body>
