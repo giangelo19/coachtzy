@@ -34,19 +34,37 @@ export const heroesAPI = {
     }
   },
 
-  // Filter heroes by role
+  // Filter heroes by role (checks both role1 and role2)
   async getByRole(role) {
     try {
       const { data, error } = await supabase
         .from('heroes')
         .select('*')
-        .eq('role', role)
+        .or(`role1.eq.${role},role2.eq.${role}`)
+        .eq('is_available', true)
         .order('name', { ascending: true })
       
       if (error) throw error
       return data
     } catch (error) {
       console.error('Error fetching heroes by role:', error.message)
+      throw error
+    }
+  },
+
+  // Get available heroes only
+  async getAvailable() {
+    try {
+      const { data, error } = await supabase
+        .from('heroes')
+        .select('*')
+        .eq('is_available', true)
+        .order('name', { ascending: true })
+      
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Error fetching available heroes:', error.message)
       throw error
     }
   },
