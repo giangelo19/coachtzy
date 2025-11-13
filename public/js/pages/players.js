@@ -33,7 +33,7 @@ async function loadPlayers() {
         // Show loading state
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align: center; padding: 40px;">
+                <td colspan="7" style="text-align: center; padding: 40px;">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
                         <div class="loading-spinner"></div>
                         <span>Loading players...</span>
@@ -81,7 +81,7 @@ async function loadPlayers() {
         console.error('Error loading players:', error);
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align: center; padding: 40px;">
+                <td colspan="7" style="text-align: center; padding: 40px;">
                     <div style="color: #dc3545;">
                         <p style="font-weight: 600; margin-bottom: 10px;">❌ Error Loading Players</p>
                         <p style="font-size: 14px;">${error.message}</p>
