@@ -1,9 +1,29 @@
 import { supabase } from '../supabase-client.js'
 
 export const playersAPI = {
-  // Get all players for the current team
+  // Get all players for the current user's team
   async getAll() {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) throw new Error('User not authenticated')
+      
+      // Get user's team first
+      const { data: team, error: teamError } = await supabase
+        .from('teams')
+        .select('id')
+        .eq('coach_id', user.id)
+        .maybeSingle()
+      
+      if (teamError && teamError.code !== 'PGRST116') throw teamError
+      
+      // If no team, return empty array
+      if (!team) {
+        console.log('No team found, returning empty players list')
+        return []
+      }
+      
+      // Get players for this team
       const { data, error } = await supabase
         .from('players')
         .select(`
@@ -25,10 +45,11 @@ export const playersAPI = {
             )
           )
         `)
+        .eq('team_id', team.id)
         .order('created_at', { ascending: false })
       
       if (error) throw error
-      return data
+      return data || []
     } catch (error) {
       console.error('Error fetching players:', error.message)
       throw error
@@ -73,9 +94,26 @@ export const playersAPI = {
   // Create new player
   async create(playerData) {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) throw new Error('User not authenticated')
+      
+      // Get user's team
+      const { data: team, error: teamError } = await supabase
+        .from('teams')
+        .select('id')
+        .eq('coach_id', user.id)
+        .single()
+      
+      if (teamError) throw new Error('You must create a team first before adding players')
+      
+      // Create player with team_id
       const { data, error } = await supabase
         .from('players')
-        .insert(playerData)
+        .insert({
+          ...playerData,
+          team_id: team.id
+        })
         .select()
         .single()
       

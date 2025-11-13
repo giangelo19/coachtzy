@@ -187,6 +187,8 @@ function createRoleIcon(role) {
 
 // Create hero icons HTML
 function createHeroIcons(playerHeroes) {
+    console.log('Creating hero icons for:', playerHeroes);
+    
     if (!playerHeroes || playerHeroes.length === 0) {
         return '<div class="hero-icons"><span style="color: #666; font-size: 14px;">No heroes</span></div>';
     }
@@ -197,6 +199,8 @@ function createHeroIcons(playerHeroes) {
         const hero = ph.hero || {};
         const iconUrl = hero.icon || '/assets/placeholder.jpg';
         const heroName = hero.name || 'Unknown';
+        
+        console.log('Hero icon:', { heroName, iconUrl, hero });
         
         return `<img src="${iconUrl}" alt="${heroName}" class="hero-icon" title="${heroName}" />`;
     }).join('');
@@ -460,12 +464,11 @@ async function handleAddPlayer(form) {
 
         // Get form data
         const formData = new FormData(form);
+        // Note: team_id is now automatically added by the API
         const playerData = {
-            user_id: user.id,
             name: formData.get('playerName').trim(),
             role: formData.get('playerRole'),
             status: formData.get('playerStatus'),
-            team_id: formData.get('playerTeam') || null,
             average_kda: formData.get('playerKDA') ? parseFloat(formData.get('playerKDA')) : null,
             winrate: formData.get('playerWinrate') ? parseFloat(formData.get('playerWinrate')) : null
         };

@@ -1,9 +1,29 @@
 import { supabase } from '../supabase-client.js'
 
 export const matchesAPI = {
-  // Get all matches for current team
+  // Get all matches for current user's team
   async getAll() {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) throw new Error('User not authenticated')
+      
+      // Get user's team first
+      const { data: team, error: teamError } = await supabase
+        .from('teams')
+        .select('id')
+        .eq('coach_id', user.id)
+        .maybeSingle()
+      
+      if (teamError && teamError.code !== 'PGRST116') throw teamError
+      
+      // If no team, return empty array
+      if (!team) {
+        console.log('No team found, returning empty matches list')
+        return []
+      }
+      
+      // Get matches for this team
       const { data, error } = await supabase
         .from('matches')
         .select(`
@@ -15,10 +35,11 @@ export const matchesAPI = {
             hero:heroes(name, icon)
           )
         `)
+        .eq('team_id', team.id)
         .order('match_date', { ascending: false })
       
       if (error) throw error
-      return data
+      return data || []
     } catch (error) {
       console.error('Error fetching matches:', error.message)
       throw error
@@ -52,9 +73,26 @@ export const matchesAPI = {
   // Create new match
   async create(matchData) {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) throw new Error('User not authenticated')
+      
+      // Get user's team
+      const { data: team, error: teamError } = await supabase
+        .from('teams')
+        .select('id')
+        .eq('coach_id', user.id)
+        .single()
+      
+      if (teamError) throw new Error('You must create a team first before adding matches')
+      
+      // Create match with team_id
       const { data, error } = await supabase
         .from('matches')
-        .insert(matchData)
+        .insert({
+          ...matchData,
+          team_id: team.id
+        })
         .select()
         .single()
       

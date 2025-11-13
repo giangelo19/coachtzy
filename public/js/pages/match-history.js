@@ -243,8 +243,8 @@ async function handleAddMatch(e) {
     
     const averageKda = formData.get('averageKda');
     
+    // Note: team_id is now automatically added by the API
     const matchData = {
-      user_id: user.id,
       match_date: formData.get('matchDate'),
       opponent_name: formData.get('opponentName'),
       result: result,

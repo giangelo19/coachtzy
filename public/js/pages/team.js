@@ -1,6 +1,6 @@
 // Team page functionality
 import { requireAuth, getCurrentUser } from '../auth.js';
-import { getCurrent, getStats, getRoster } from '../api/teams.js';
+import { teamsAPI } from '../api/teams.js';
 
 // Protect this page
 await requireAuth();
@@ -25,14 +25,13 @@ async function loadTeamData() {
   try {
     showLoading();
 
-    const team = await getCurrent();
-    const stats = await getStats();
-    const roster = await getRoster();
+    // Get current user's team (includes players via join)
+    const team = await teamsAPI.getCurrent();
 
     if (team) {
       updateTeamProfile(team);
-      updateTeamStats(stats);
-      updateRoster(roster);
+      updateTeamStats(team);
+      updateRoster(team.players || []);
     } else {
       showNoTeamMessage();
     }
@@ -58,55 +57,64 @@ function updateTeamProfile(team) {
   if (countryEl) countryEl.textContent = team.country || 'Country';
 }
 
-function updateTeamStats(stats) {
-  if (!stats) return;
+function updateTeamStats(team) {
+  if (!team) return;
 
   const totalWinsEl = document.querySelector('.team-stat-card:nth-child(1) .stat-number');
   const totalLossesEl = document.querySelector('.team-stat-card:nth-child(2) .stat-number');
   const avgKdaEl = document.querySelector('.team-stat-card:nth-child(3) .stat-number');
   const winrateEl = document.querySelector('.team-stat-card:nth-child(4) .stat-number');
 
-  if (totalWinsEl) totalWinsEl.textContent = stats.total_wins || 0;
-  if (totalLossesEl) totalLossesEl.textContent = stats.total_losses || 0;
-  if (avgKdaEl) avgKdaEl.textContent = (stats.average_kda || 0).toFixed(2);
-  if (winrateEl) winrateEl.textContent = `${(stats.winrate || 0).toFixed(1)}%`;
+  if (totalWinsEl) totalWinsEl.textContent = team.total_wins || 0;
+  if (totalLossesEl) totalLossesEl.textContent = team.total_losses || 0;
+  if (avgKdaEl) avgKdaEl.textContent = (team.average_kda || 0).toFixed(2);
+  if (winrateEl) winrateEl.textContent = `${(team.winrate || 0).toFixed(1)}%`;
 }
 
 function updateRoster(roster) {
-  const rosterContainer = document.querySelector('.roster-list, .roster-grid');
+  const rosterContainer = document.getElementById('rosterList');
+  const rosterCount = document.getElementById('rosterCount');
+  
   if (!rosterContainer) return;
 
+  // Update roster count
+  if (rosterCount) {
+    rosterCount.textContent = `${roster ? roster.length : 0} Players`;
+  }
+
   if (!roster || roster.length === 0) {
-    rosterContainer.innerHTML = '<p class="no-data">No players in roster. Add players to get started.</p>';
+    rosterContainer.innerHTML = '<p class="no-data" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No players in roster. Add players from the Players tab to get started.</p>';
     return;
   }
 
-  rosterContainer.innerHTML = roster.map(player => `
-    <div class="roster-player">
-      <img src="${player.profile_picture || '../assets/default_pfp.png'}" alt="${player.name}" class="player-avatar" />
-      <div class="player-info">
-        <h4 class="player-name">${player.name}</h4>
-        <div class="player-role">
-          <img src="../assets/${getRoleIcon(player.role)}" alt="${player.role}" class="role-icon-small" />
-          <span>${formatRole(player.role)}</span>
+  rosterContainer.innerHTML = roster.map(player => {
+    const kda = player.average_kda || 0;
+    const winrate = player.winrate || 0;
+    const winrateClass = winrate >= 50 ? 'success' : 'error';
+    
+    return `
+      <div class="roster-player">
+        <img src="${player.profile_picture || '../assets/default_pfp.png'}" alt="${player.name}" class="roster-avatar" />
+        <div class="roster-player-info">
+          <span class="roster-player-name">${player.name}</span>
+          <div class="roster-player-role">
+            <img src="../assets/${getRoleIcon(player.role)}" alt="${formatRole(player.role)}" class="roster-role-icon" />
+            <span>${formatRole(player.role)}</span>
+          </div>
+        </div>
+        <div class="roster-stats">
+          <div class="roster-stat">
+            <span class="stat-label-small">KDA</span>
+            <span class="stat-value-small">${kda.toFixed(2)}</span>
+          </div>
+          <div class="roster-stat">
+            <span class="stat-label-small">WR</span>
+            <span class="stat-value-small ${winrateClass}">${winrate.toFixed(1)}%</span>
+          </div>
         </div>
       </div>
-      <div class="player-stats-inline">
-        <div class="stat-item">
-          <span class="stat-label">KDA</span>
-          <span class="stat-value">${(player.average_kda || 0).toFixed(2)}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">WR</span>
-          <span class="stat-value">${(player.winrate || 0).toFixed(1)}%</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Matches</span>
-          <span class="stat-value">${player.total_matches || 0}</span>
-        </div>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function getRoleIcon(role) {

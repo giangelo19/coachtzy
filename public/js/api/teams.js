@@ -1,22 +1,52 @@
 import { supabase } from '../supabase-client.js'
 
 export const teamsAPI = {
-  // Get current team for logged-in coach
+  // Get current team for logged-in user (via profile -> team)
   async getCurrent() {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
       
-      const { data, error } = await supabase
+      if (userError || !user) throw new Error('User not authenticated')
+      
+      // Get team by coach_id (user.id is same as profile.id)
+      const { data: team, error: teamError } = await supabase
         .from('teams')
-        .select('*')
+        .select(`
+          *,
+          players:players(
+            id,
+            name,
+            role,
+            status,
+            average_kda,
+            winrate,
+            profile_picture,
+            total_matches,
+            total_wins,
+            total_losses
+          )
+        `)
         .eq('coach_id', user.id)
-        .single()
+        .maybeSingle()
       
-      if (error) throw error
-      return data
+      if (teamError && teamError.code !== 'PGRST116') {
+        console.error('Error fetching team:', teamError)
+        throw teamError
+      }
+      
+      // If no team exists, return null
+      if (!team) {
+        console.log('No team found for user:', user.id)
+        return null
+      }
+      
+      console.log('Team found:', team)
+      console.log('Players found:', team.players?.length || 0)
+      
+      return team
     } catch (error) {
       console.error('Error fetching team:', error.message)
-      throw error
+      return null
     }
   },
 
@@ -37,10 +67,18 @@ export const teamsAPI = {
     }
   },
 
-  // Create team
+  // Create team (one team per coach)
   async create(teamData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      
+      if (userError || !user) throw new Error('User not authenticated')
+      
+      // Check if user already has a team
+      const existingTeam = await this.getCurrent()
+      if (existingTeam) {
+        throw new Error('You already have a team. Each coach can only have one team.')
+      }
       
       const { data, error } = await supabase
         .from('teams')
