@@ -162,7 +162,7 @@
               </svg>
             </div>
             <div class="stat-content">
-              <div class="stat-value">12</div>
+              <div class="stat-value">0</div>
               <div class="stat-label">Total Wins</div>
             </div>
           </div>
@@ -175,7 +175,7 @@
               </svg>
             </div>
             <div class="stat-content">
-              <div class="stat-value">18</div>
+              <div class="stat-value">0</div>
               <div class="stat-label">Total Losses</div>
             </div>
           </div>
@@ -187,7 +187,7 @@
               </svg>
             </div>
             <div class="stat-content">
-              <div class="stat-value">10.2</div>
+              <div class="stat-value">0.0</div>
               <div class="stat-label">Average KDA</div>
             </div>
           </div>
@@ -200,7 +200,7 @@
               </svg>
             </div>
             <div class="stat-content">
-              <div class="stat-value">40%</div>
+              <div class="stat-value">0%</div>
               <div class="stat-label">Winrate</div>
             </div>
           </div>
@@ -209,113 +209,10 @@
           <div class="card roster-card-new">
             <div class="card-header">
               <h2>Current Roster</h2>
-              <span class="roster-count">5 Players</span>
+              <span class="roster-count" id="rosterCount">0 Players</span>
             </div>
-            <div class="roster-list">
-              <div class="roster-player">
-                <img src="../assets/default_pfp.png" alt="Geloqt" class="roster-avatar" />
-                <div class="roster-player-info">
-                  <span class="roster-player-name">Geloqt</span>
-                  <div class="roster-player-role">
-                    <img src="../assets/midLane.png" alt="Mid Lane" class="roster-role-icon" />
-                    <span>Mid Lane</span>
-                  </div>
-                </div>
-                <div class="roster-stats">
-                  <div class="roster-stat">
-                    <span class="stat-label-small">KDA</span>
-                    <span class="stat-value-small">6.2</span>
-                  </div>
-                  <div class="roster-stat">
-                    <span class="stat-label-small">WR</span>
-                    <span class="stat-value-small success">71%</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="roster-player">
-                <img src="../assets/default_pfp.png" alt="ShadowX" class="roster-avatar" />
-                <div class="roster-player-info">
-                  <span class="roster-player-name">ShadowX</span>
-                  <div class="roster-player-role">
-                    <img src="../assets/jungle.png" alt="Jungle" class="roster-role-icon" />
-                    <span>Jungle</span>
-                  </div>
-                </div>
-                <div class="roster-stats">
-                  <div class="roster-stat">
-                    <span class="stat-label-small">KDA</span>
-                    <span class="stat-value-small">5.8</span>
-                  </div>
-                  <div class="roster-stat">
-                    <span class="stat-label-small">WR</span>
-                    <span class="stat-value-small success">68%</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="roster-player">
-                <img src="../assets/default_pfp.png" alt="MoonKnight" class="roster-avatar" />
-                <div class="roster-player-info">
-                  <span class="roster-player-name">MoonKnight</span>
-                  <div class="roster-player-role">
-                    <img src="../assets/expLane.png" alt="Exp Lane" class="roster-role-icon" />
-                    <span>Exp Lane</span>
-                  </div>
-                </div>
-                <div class="roster-stats">
-                  <div class="roster-stat">
-                    <span class="stat-label-small">KDA</span>
-                    <span class="stat-value-small">7.1</span>
-                  </div>
-                  <div class="roster-stat">
-                    <span class="stat-label-small">WR</span>
-                    <span class="stat-value-small success">75%</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="roster-player">
-                <img src="../assets/default_pfp.png" alt="Phoenix" class="roster-avatar" />
-                <div class="roster-player-info">
-                  <span class="roster-player-name">Phoenix</span>
-                  <div class="roster-player-role">
-                    <img src="../assets/goldLane.png" alt="Gold Lane" class="roster-role-icon" />
-                    <span>Gold Lane</span>
-                  </div>
-                </div>
-                <div class="roster-stats">
-                  <div class="roster-stat">
-                    <span class="stat-label-small">KDA</span>
-                    <span class="stat-value-small">6.5</span>
-                  </div>
-                  <div class="roster-stat">
-                    <span class="stat-label-small">WR</span>
-                    <span class="stat-value-small success">72%</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="roster-player">
-                <img src="../assets/default_pfp.png" alt="IceBreaker" class="roster-avatar" />
-                <div class="roster-player-info">
-                  <span class="roster-player-name">IceBreaker</span>
-                  <div class="roster-player-role">
-                    <img src="../assets/roam.png" alt="Roam" class="roster-role-icon" />
-                    <span>Roam</span>
-                  </div>
-                </div>
-                <div class="roster-stats">
-                  <div class="roster-stat">
-                    <span class="stat-label-small">KDA</span>
-                    <span class="stat-value-small">4.9</span>
-                  </div>
-                  <div class="roster-stat">
-                    <span class="stat-label-small">WR</span>
-                    <span class="stat-value-small error">62%</span>
-                  </div>
-                </div>
-              </div>
+            <div class="roster-list" id="rosterList">
+              <!-- Players will be loaded dynamically from database -->
             </div>
           </div>
 
@@ -343,48 +240,30 @@
                 <svg class="line-chart" viewBox="0 0 700 200" preserveAspectRatio="none">
                   <defs>
                     <linearGradient id="teamLineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style="stop-color:var(--accent-orange);stop-opacity:0.3" />
+                      <stop offset="0%" style="stop-color:var(--accent-orange);stop-opacity:0.4" />
+                      <stop offset="50%" style="stop-color:var(--accent-orange);stop-opacity:0.2" />
                       <stop offset="100%" style="stop-color:var(--accent-orange);stop-opacity:0" />
                     </linearGradient>
                   </defs>
                   <!-- Grid lines -->
-                  <line x1="0" y1="25" x2="700" y2="25" stroke="var(--border-color)" stroke-width="1" opacity="0.3"/>
-                  <line x1="0" y1="50" x2="700" y2="50" stroke="var(--border-color)" stroke-width="1" opacity="0.3"/>
-                  <line x1="0" y1="75" x2="700" y2="75" stroke="var(--border-color)" stroke-width="1" opacity="0.3"/>
+                  <line x1="0" y1="25" x2="700" y2="25" stroke="var(--border-color)" stroke-width="1" opacity="0.2"/>
+                  <line x1="0" y1="50" x2="700" y2="50" stroke="var(--border-color)" stroke-width="1" opacity="0.2"/>
+                  <line x1="0" y1="75" x2="700" y2="75" stroke="var(--border-color)" stroke-width="1" opacity="0.2"/>
                   <line x1="0" y1="100" x2="700" y2="100" stroke="var(--border-color)" stroke-width="1" opacity="0.3"/>
                   <line x1="0" y1="125" x2="700" y2="125" stroke="var(--border-color)" stroke-width="1" opacity="0.3"/>
                   <line x1="0" y1="150" x2="700" y2="150" stroke="var(--border-color)" stroke-width="1" opacity="0.3"/>
                   <line x1="0" y1="175" x2="700" y2="175" stroke="var(--border-color)" stroke-width="1" opacity="0.3"/>
                   
-                  <!-- Area fill -->
-                  <polygon
-                    fill="url(#teamLineGradient)"
-                    points="0,200 0,120 116.67,100 233.33,105 350,145 466.67,150 583.33,80 700,95 700,200"
-                  />
-                  <!-- Line -->
-                  <polyline
-                    fill="none"
-                    stroke="var(--accent-orange)"
-                    stroke-width="3"
-                    points="0,120 116.67,100 233.33,105 350,145 466.67,150 583.33,80 700,95"
-                  />
-                  <!-- Data points -->
-                  <circle cx="0" cy="120" r="4" fill="var(--accent-orange)"/>
-                  <circle cx="116.67" cy="100" r="4" fill="var(--accent-orange)"/>
-                  <circle cx="233.33" cy="105" r="4" fill="var(--accent-orange)"/>
-                  <circle cx="350" cy="145" r="4" fill="var(--accent-orange)"/>
-                  <circle cx="466.67" cy="150" r="4" fill="var(--accent-orange)"/>
-                  <circle cx="583.33" cy="80" r="5" fill="var(--accent-orange)" stroke="var(--bg-card)" stroke-width="2"/>
-                  <circle cx="700" cy="95" r="4" fill="var(--accent-orange)"/>
+                  <!-- Chart data will be added dynamically by JavaScript -->
                 </svg>
-                <div class="chart-x-labels">
-                  <span>Oct 5</span>
-                  <span>Oct 6</span>
-                  <span>Oct 7</span>
-                  <span>Oct 8</span>
-                  <span>Oct 9</span>
-                  <span>Oct 10</span>
-                  <span>Oct 11</span>
+                <div class="chart-x-axis">
+                  <span>-</span>
+                  <span>-</span>
+                  <span>-</span>
+                  <span>-</span>
+                  <span>-</span>
+                  <span>-</span>
+                  <span>-</span>
                 </div>
               </div>
             </div>

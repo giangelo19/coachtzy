@@ -28,28 +28,46 @@ async function loadMatches(){
   });
 }
 
-document.getElementById('player-form').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  const payload = Object.fromEntries(fd.entries());
-  await api('players', { method: 'POST', body: JSON.stringify(payload) });
-  e.target.reset();
+const playerForm = document.getElementById('player-form');
+if (playerForm) {
+  playerForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = Object.fromEntries(fd.entries());
+    await api('players', { method: 'POST', body: JSON.stringify(payload) });
+    e.target.reset();
+    loadPlayers();
+  });
+}
+
+const matchForm = document.getElementById('match-form');
+if (matchForm) {
+  matchForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = Object.fromEntries(fd.entries());
+    await api('matches', { method: 'POST', body: JSON.stringify(payload) });
+    e.target.reset();
+    loadMatches();
+  });
+}
+
+const simulateBtn = document.getElementById('simulate');
+if (simulateBtn) {
+  simulateBtn.addEventListener('click', async ()=>{
+    const res = await api('draft/simulate', { method: 'POST', body: JSON.stringify({}) });
+    const draftResult = document.getElementById('draft-result');
+    if (draftResult) {
+      draftResult.textContent = JSON.stringify(res, null, 2);
+    }
+  });
+}
+
+// Only load players and matches if the relevant elements exist
+if (document.querySelector('.players-list') || document.querySelector('#players-container')) {
   loadPlayers();
-});
+}
 
-document.getElementById('match-form').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  const payload = Object.fromEntries(fd.entries());
-  await api('matches', { method: 'POST', body: JSON.stringify(payload) });
-  e.target.reset();
+if (document.querySelector('.matches-list') || document.querySelector('#matches-container')) {
   loadMatches();
-});
-
-document.getElementById('simulate').addEventListener('click', async ()=>{
-  const res = await api('draft/simulate', { method: 'POST', body: JSON.stringify({}) });
-  document.getElementById('draft-result').textContent = JSON.stringify(res, null, 2);
-});
-
-loadPlayers();
-loadMatches();
+}

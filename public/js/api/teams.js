@@ -9,23 +9,10 @@ export const teamsAPI = {
       if (userError || !user) throw new Error('User not authenticated')
       
       // Get team by coach_id (user.id is same as profile.id)
+      // Don't fetch players here - use playersAPI.getAll() instead
       const { data: team, error: teamError } = await supabase
         .from('teams')
-        .select(`
-          *,
-          players:players(
-            id,
-            name,
-            role,
-            status,
-            average_kda,
-            winrate,
-            profile_picture,
-            total_matches,
-            total_wins,
-            total_losses
-          )
-        `)
+        .select('*')
         .eq('coach_id', user.id)
         .maybeSingle()
       
@@ -41,7 +28,6 @@ export const teamsAPI = {
       }
       
       console.log('Team found:', team)
-      console.log('Players found:', team.players?.length || 0)
       
       return team
     } catch (error) {
