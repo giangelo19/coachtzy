@@ -61,7 +61,7 @@
       <header>
         <h1>Team</h1>
         <div class="header-actions">
-          <button class="btn-primary">
+          <button id="editTeamBtn" class="edit-team-btn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -113,18 +113,26 @@
       </header>
 
       <main class="team-content">
-        <div class="team-grid">
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="loading-screen">
+          <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Loading team data...</p>
+          </div>
+        </div>
+
+        <div id="teamDataContent" class="team-grid" style="display: none;">
           
           <!-- Team Profile Card -->
           <div class="card team-profile-card">
             <div class="team-banner"></div>
             <div class="team-profile-content">
               <div class="team-logo-wrapper">
-                <img src="/assets/logo.png" alt="UPTC Maroons Logo" class="team-logo-large" />
+                <img id="teamLogo" src="/assets/logo.png" alt="Team Logo" class="team-logo-large" />
               </div>
               <div class="team-info-header">
-                <h2>UPTC Maroons</h2>
-                <span class="team-tag">MRN</span>
+                <h2 id="teamName">Team Name</h2>
+                <span id="teamAcronym" class="team-tag">TM</span>
               </div>
               <div class="team-meta">
                 <div class="meta-item">
@@ -134,21 +142,21 @@
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                   </svg>
-                  <span>5 Players</span>
+                  <span id="playerCount">0 Players</span>
                 </div>
                 <div class="meta-item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 16 14"></polyline>
                   </svg>
-                  <span>Est. 2024</span>
+                  <span id="establishedYear">Est. -</span>
                 </div>
                 <div class="meta-item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                     <circle cx="12" cy="10" r="3"></circle>
                   </svg>
-                  <span>Philippines</span>
+                  <span id="teamCountry">-</span>
                 </div>
               </div>
             </div>
@@ -270,7 +278,83 @@
           </div>
 
         </div>
+        <!-- End team data content -->
       </main>
+    </div>
+
+    <!-- Edit Team Modal -->
+    <div id="editTeamModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Team Profile</h2>
+          <button class="modal-close" id="closeEditModal">&times;</button>
+        </div>
+        <form id="editTeamForm">
+          <div class="form-group">
+            <label for="editTeamName">Team Name *</label>
+            <input type="text" id="editTeamName" name="name" required maxlength="100" placeholder="Enter team name">
+          </div>
+          
+          <div class="form-group">
+            <label for="editTeamAcronym">Team Acronym/Tag *</label>
+            <input type="text" id="editTeamAcronym" name="acronym" required maxlength="10" placeholder="e.g., MRN">
+          </div>
+          
+          <div class="form-group">
+            <label for="editTeamLogo">Team Logo</label>
+            <div class="logo-upload-container">
+              <div class="logo-preview" id="logoPreview">
+                <img id="logoPreviewImg" src="" alt="Logo preview" style="display: none;">
+                <div id="logoPlaceholder" class="logo-placeholder">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                  <span>Upload Logo</span>
+                </div>
+              </div>
+              <div class="logo-upload-actions">
+                <input type="file" id="logoFileInput" accept="image/*" style="display: none;">
+                <button type="button" class="btn-upload" id="uploadLogoBtn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  Choose File
+                </button>
+                <button type="button" class="btn-remove-logo" id="removeLogoBtn" style="display: none;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                  Remove
+                </button>
+              </div>
+            </div>
+            <input type="hidden" id="editTeamLogo" name="logo">
+            <small>Upload an image from your computer or use an existing one</small>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editEstablishedYear">Established Year</label>
+              <input type="number" id="editEstablishedYear" name="established_year" min="1900" max="2100" placeholder="2024">
+            </div>
+            
+            <div class="form-group">
+              <label for="editCountry">Country</label>
+              <input type="text" id="editCountry" name="country" maxlength="100" placeholder="Philippines">
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" id="cancelEditBtn">Cancel</button>
+            <button type="submit" class="btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <script src="app.js"></script>

@@ -5,6 +5,7 @@ import { requireAuth, getCurrentUser } from '../auth.js';
 import { teamsAPI } from '../api/teams.js';
 import { playersAPI } from '../api/players.js';
 import { matchesAPI } from '../api/matches.js';
+import { supabase } from '../supabase-client.js';
 
 console.log('✅ Imports loaded successfully');
 
@@ -51,8 +52,16 @@ async function loadTeamData() {
     console.log('Team result:', team);
 
     if (team) {
-      console.log('Team found, updating profile...');
-      updateTeamProfile(team);
+      console.log('Team found, loading data...');
+      
+      // Load players first to get count
+      console.log('Fetching players...');
+      const players = await playersAPI.getAll();
+      console.log('Players result:', players);
+      console.log('Number of players:', players ? players.length : 0);
+      
+      // Update team profile with player count
+      updateTeamProfile(team, players ? players.length : 0);
       
       // Fetch matches to calculate stats
       console.log('Fetching matches...');
@@ -70,12 +79,7 @@ async function loadTeamData() {
       console.log('Weekly performance data:', weeklyData);
       updateWeeklyPerformanceChart(weeklyData);
       
-      // Load players separately using the same API as Players page
-      console.log('Fetching players...');
-      const players = await playersAPI.getAll();
-      console.log('Players result:', players);
-      console.log('Number of players:', players ? players.length : 0);
-      
+      // Update roster
       updateRoster(players || []);
     } else {
       console.log('No team found, showing no team message');
@@ -287,18 +291,36 @@ function hideTooltip() {
   }
 }
 
-function updateTeamProfile(team) {
-  const teamNameEl = document.querySelector('.team-name');
-  const teamAcronymEl = document.querySelector('.team-acronym');
-  const teamLogoEl = document.querySelector('.team-logo');
-  const establishedYearEl = document.querySelector('.established-year');
-  const countryEl = document.querySelector('.country');
+function updateTeamProfile(team, playerCount = 0) {
+  const teamNameEl = document.getElementById('teamName');
+  const teamAcronymEl = document.getElementById('teamAcronym');
+  const teamLogoEl = document.getElementById('teamLogo');
+  const establishedYearEl = document.getElementById('establishedYear');
+  const countryEl = document.getElementById('teamCountry');
+  const playerCountEl = document.getElementById('playerCount');
 
   if (teamNameEl) teamNameEl.textContent = team.name || 'Team Name';
   if (teamAcronymEl) teamAcronymEl.textContent = team.acronym || 'TM';
-  if (teamLogoEl && team.logo) teamLogoEl.src = team.logo;
-  if (establishedYearEl) establishedYearEl.textContent = `Est. ${team.established_year || 'N/A'}`;
-  if (countryEl) countryEl.textContent = team.country || 'Country';
+  if (teamLogoEl) {
+    if (team.logo) {
+      teamLogoEl.src = team.logo;
+      teamLogoEl.style.display = 'block';
+    } else {
+      teamLogoEl.src = '/assets/logo.png'; // Fallback logo
+    }
+  }
+  if (establishedYearEl) establishedYearEl.textContent = `Est. ${team.established_year || '-'}`;
+  if (countryEl) countryEl.textContent = team.country || '-';
+  if (playerCountEl) playerCountEl.textContent = `${playerCount} Player${playerCount !== 1 ? 's' : ''}`;
+  
+  console.log('Team profile updated:', {
+    name: team.name,
+    acronym: team.acronym,
+    logo: team.logo,
+    playerCount,
+    established: team.established_year,
+    country: team.country
+  });
 }
 
 function updateTeamStats(stats) {
@@ -456,6 +478,53 @@ function setupEventListeners() {
     });
   }
 
+  // Edit team button
+  const editTeamBtn = document.getElementById('editTeamBtn');
+  if (editTeamBtn) {
+    editTeamBtn.addEventListener('click', openEditTeamModal);
+  }
+
+  // Edit team modal controls
+  const closeEditModal = document.getElementById('closeEditModal');
+  const cancelEditBtn = document.getElementById('cancelEditBtn');
+  const editTeamModal = document.getElementById('editTeamModal');
+  
+  if (closeEditModal) {
+    closeEditModal.addEventListener('click', closeEditTeamModal);
+  }
+  
+  if (cancelEditBtn) {
+    cancelEditBtn.addEventListener('click', closeEditTeamModal);
+  }
+  
+  if (editTeamModal) {
+    editTeamModal.addEventListener('click', (e) => {
+      if (e.target === editTeamModal) {
+        closeEditTeamModal();
+      }
+    });
+  }
+
+  // Logo upload controls
+  const uploadLogoBtn = document.getElementById('uploadLogoBtn');
+  const logoFileInput = document.getElementById('logoFileInput');
+  const removeLogoBtn = document.getElementById('removeLogoBtn');
+  
+  if (uploadLogoBtn && logoFileInput) {
+    uploadLogoBtn.addEventListener('click', () => logoFileInput.click());
+    logoFileInput.addEventListener('change', handleLogoUpload);
+  }
+  
+  if (removeLogoBtn) {
+    removeLogoBtn.addEventListener('click', removeLogoPreview);
+  }
+
+  // Edit team form submit
+  const editTeamForm = document.getElementById('editTeamForm');
+  if (editTeamForm) {
+    editTeamForm.addEventListener('submit', handleEditTeamSubmit);
+  }
+
   // Logout button
   const logoutBtn = document.querySelector('.dropdown-item[href*="logout"]');
   if (logoutBtn) {
@@ -470,12 +539,243 @@ function setupEventListeners() {
 
 function showLoading() {
   console.log('Loading team data...');
+  const loadingScreen = document.getElementById('loadingScreen');
+  const teamDataContent = document.getElementById('teamDataContent');
+  
+  if (loadingScreen) loadingScreen.style.display = 'flex';
+  if (teamDataContent) teamDataContent.style.display = 'none';
 }
 
 function hideLoading() {
   console.log('Loading complete');
+  const loadingScreen = document.getElementById('loadingScreen');
+  const teamDataContent = document.getElementById('teamDataContent');
+  
+  if (loadingScreen) loadingScreen.style.display = 'none';
+  if (teamDataContent) teamDataContent.style.display = 'grid';
 }
 
 function showError(message) {
   alert(message);
+}
+
+// Store current team globally for editing
+let currentTeam = null;
+
+async function handleLogoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file');
+    return;
+  }
+  
+  // Validate file size (max 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    alert('Image size must be less than 2MB');
+    return;
+  }
+  
+  try {
+    // Show loading state
+    const uploadLogoBtn = document.getElementById('uploadLogoBtn');
+    if (uploadLogoBtn) {
+      uploadLogoBtn.disabled = true;
+      uploadLogoBtn.innerHTML = '<span>Uploading...</span>';
+    }
+    
+    // Generate unique filename
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${currentTeam.id}-${Date.now()}.${fileExt}`;
+    
+    // Upload to Supabase storage
+    const { data, error } = await supabase.storage
+      .from('team-logos')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+    
+    if (error) throw error;
+    
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('team-logos')
+      .getPublicUrl(fileName);
+    
+    const publicUrl = urlData.publicUrl;
+    
+    // Update preview and hidden input
+    const logoPreviewImg = document.getElementById('logoPreviewImg');
+    const logoPlaceholder = document.getElementById('logoPlaceholder');
+    const removeLogoBtn = document.getElementById('removeLogoBtn');
+    const editTeamLogo = document.getElementById('editTeamLogo');
+    
+    if (logoPreviewImg && logoPlaceholder && editTeamLogo) {
+      logoPreviewImg.src = publicUrl;
+      logoPreviewImg.style.display = 'block';
+      logoPlaceholder.style.display = 'none';
+      editTeamLogo.value = publicUrl;
+      
+      if (removeLogoBtn) {
+        removeLogoBtn.style.display = 'flex';
+      }
+    }
+    
+    console.log('Logo uploaded successfully:', publicUrl);
+    
+  } catch (error) {
+    console.error('Error uploading logo:', error);
+    alert('Failed to upload logo. Please try again.');
+  } finally {
+    // Reset button state
+    const uploadLogoBtn = document.getElementById('uploadLogoBtn');
+    if (uploadLogoBtn) {
+      uploadLogoBtn.disabled = false;
+      uploadLogoBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        Choose File
+      `;
+    }
+  }
+}
+
+function removeLogoPreview() {
+  const logoPreviewImg = document.getElementById('logoPreviewImg');
+  const logoPlaceholder = document.getElementById('logoPlaceholder');
+  const removeLogoBtn = document.getElementById('removeLogoBtn');
+  const editTeamLogo = document.getElementById('editTeamLogo');
+  const logoFileInput = document.getElementById('logoFileInput');
+  
+  if (logoPreviewImg) {
+    logoPreviewImg.src = '';
+    logoPreviewImg.style.display = 'none';
+  }
+  
+  if (logoPlaceholder) {
+    logoPlaceholder.style.display = 'flex';
+  }
+  
+  if (removeLogoBtn) {
+    removeLogoBtn.style.display = 'none';
+  }
+  
+  if (editTeamLogo) {
+    editTeamLogo.value = '';
+  }
+  
+  if (logoFileInput) {
+    logoFileInput.value = '';
+  }
+}
+
+async function openEditTeamModal() {
+  console.log('Opening edit team modal...');
+  
+  // Get current team data
+  currentTeam = await teamsAPI.getCurrent();
+  
+  if (!currentTeam) {
+    showError('No team found. Please create a team first.');
+    return;
+  }
+  
+  // Populate form with current team data
+  document.getElementById('editTeamName').value = currentTeam.name || '';
+  document.getElementById('editTeamAcronym').value = currentTeam.acronym || '';
+  document.getElementById('editEstablishedYear').value = currentTeam.established_year || '';
+  document.getElementById('editCountry').value = currentTeam.country || '';
+  
+  // Handle logo preview
+  const logoPreviewImg = document.getElementById('logoPreviewImg');
+  const logoPlaceholder = document.getElementById('logoPlaceholder');
+  const removeLogoBtn = document.getElementById('removeLogoBtn');
+  const editTeamLogo = document.getElementById('editTeamLogo');
+  
+  if (currentTeam.logo) {
+    editTeamLogo.value = currentTeam.logo;
+    logoPreviewImg.src = currentTeam.logo;
+    logoPreviewImg.style.display = 'block';
+    logoPlaceholder.style.display = 'none';
+    removeLogoBtn.style.display = 'flex';
+  } else {
+    logoPreviewImg.style.display = 'none';
+    logoPlaceholder.style.display = 'flex';
+    removeLogoBtn.style.display = 'none';
+    editTeamLogo.value = '';
+  }
+  
+  // Show modal
+  const modal = document.getElementById('editTeamModal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+}
+
+function closeEditTeamModal() {
+  const modal = document.getElementById('editTeamModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  
+  // Reset form
+  const form = document.getElementById('editTeamForm');
+  if (form) {
+    form.reset();
+  }
+  
+  // Reset logo preview
+  removeLogoPreview();
+}
+
+async function handleEditTeamSubmit(e) {
+  e.preventDefault();
+  
+  if (!currentTeam) {
+    showError('No team data available.');
+    return;
+  }
+  
+  // Get form data
+  const formData = new FormData(e.target);
+  const teamData = {
+    name: formData.get('name'),
+    acronym: formData.get('acronym'),
+    logo: formData.get('logo') || null,
+    established_year: formData.get('established_year') ? parseInt(formData.get('established_year')) : null,
+    country: formData.get('country') || null
+  };
+  
+  // Remove empty values
+  Object.keys(teamData).forEach(key => {
+    if (teamData[key] === '' || teamData[key] === null) {
+      delete teamData[key];
+    }
+  });
+  
+  console.log('Updating team with data:', teamData);
+  
+  try {
+    // Update team in database
+    const updatedTeam = await teamsAPI.update(currentTeam.id, teamData);
+    console.log('Team updated successfully:', updatedTeam);
+    
+    // Close modal
+    closeEditTeamModal();
+    
+    // Reload team data to refresh the page
+    await loadTeamData();
+    
+    // Show success message
+    alert('Team profile updated successfully!');
+  } catch (error) {
+    console.error('Error updating team:', error);
+    showError('Failed to update team profile. Please try again.');
+  }
 }
