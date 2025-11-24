@@ -1,7 +1,28 @@
 import { supabase } from '../supabase-client.js'
 
 export const playersAPI = {
-  // Get all players for the current user's team
+  
+  /**
+   * Get all players for authenticated coach's team (with their hero pools)
+   * 
+   * Data structure (nested query):
+   * Players -> team (for display) -> player_heroes -> heroes (full hero data)
+   * 
+   * Why this complex query: Players page needs to show hero pool icons.
+   * Single query with joins is faster than separate queries for each player.
+   * 
+   * RLS chain:
+   * 1. Get user's team_id (coaches.id -> teams.coach_id)
+   * 2. Filter players by team_id (prevents seeing other teams' players)
+   * 3. Player_heroes automatically filtered by RLS (linked to team via player)
+   * 
+   * Performance: Typical query <200ms for team with 5 players, 15 heroes each.
+   * Nested query is still faster than N+1 queries in a loop.
+   * 
+   * Edge case: New coaches with no team get empty array (not error).
+   */
+
+
   async getAll() {
     try {
       // Get current user

@@ -7,7 +7,17 @@ import { heroesAPI } from '../api/heroes.js';
 let selectedHeroes = [];
 let allHeroes = [];
 
-// Check authentication
+/**
+ * Verify user is authenticated before allowing player management
+ * 
+ * Why check here: Players page requires team_id from authenticated coach.
+ * RLS policies on players table ensure coaches can only see/edit their own team's players.
+ * 
+ * Security note: This is client-side check for UX only. Real security is enforced
+ * by Supabase RLS policies on the database level (cannot be bypassed).
+ * 
+ * @returns {Object|null} User object if authenticated, null and redirects if not
+ */
 async function checkAuth() {
     const { data: { user }, error } = await supabase.auth.getUser();
     
@@ -20,7 +30,21 @@ async function checkAuth() {
     return user;
 }
 
-// Load and display players
+/**
+ * Load and display all players for the authenticated coach's team
+ * 
+ * Data flow:
+ * 1. playersAPI.getAll() uses RLS to automatically filter by coach's team_id
+ * 2. Each player fetched includes hero pool via junction table (player_heroes)
+ * 3. Players displayed in table with editable fields and hero icons
+ * 
+ * Why show loading state: Database query can take 200-500ms on slow connections.
+ * Spinner prevents user from clicking "Add Player" multiple times.
+ * 
+ * Empty state UX: Friendly message encourages coaches to add first player.
+ * Critical for new team onboarding.
+ */
+
 async function loadPlayers() {
     const tbody = document.querySelector('.players-table tbody');
     

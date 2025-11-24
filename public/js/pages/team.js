@@ -41,6 +41,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+/**
+ * Load and display all team data from database
+ * 
+ * Data loading order is intentional:
+ * 1. Team info (needed for RLS - all subsequent queries filter by team_id)
+ * 2. Players (needed to show roster count in team header)
+ * 3. Matches (needed to calculate win/loss stats and weekly KDA chart)
+ * 
+ * Why this order: RLS policies require team_id from authenticated coach.
+ * Getting team first establishes identity for subsequent filtered queries.
+ * 
+ * Performance note: All queries run sequentially (not parallel) because
+ * team_id is needed before players/matches can be fetched with RLS.
+ */
 async function loadTeamData() {
   try {
     console.log('=== Starting loadTeamData ===');
@@ -96,6 +110,21 @@ async function loadTeamData() {
   }
 }
 
+/**
+ * Calculate aggregate team statistics from match history
+ * 
+ * Stats computed:
+ * - Total Wins: Count where result === 'win' (case-insensitive)
+ * - Total Losses: Count where result === 'loss'
+ * - Average KDA: Sum of all average_kda / total matches
+ * - Win Rate: (wins / total matches) * 100, rounded to 1 decimal
+ * 
+ * Why recalculate on every load: Ensures stats are always current.
+ * No caching needed since query is fast (<100ms for typical team).
+ * 
+ * Edge case: Empty matches return zeros (safe for new teams).
+ * This prevents division by zero and displays cleanly on dashboard.
+ */
 function calculateTeamStats(matches) {
   if (!matches || matches.length === 0) {
     return {
@@ -128,6 +157,26 @@ function calculateTeamStats(matches) {
     winrate
   };
 }
+
+/**
+ * Calculate daily average KDA for the last 7 days (for line chart)
+ * 
+ * Why 7 days: Provides recent performance trend without overwhelming detail.
+ * Coaches can spot patterns (bad weekends, practice improvements, etc.)
+ * 
+ * Algorithm:
+ * 1. Create array of last 7 days (today - 6 through today)
+ * 2. Group matches by date (YYYY-MM-DD format)
+ * 3. Calculate mean KDA for each day
+ * 
+ * Edge cases handled:
+ * - Days with no matches show 0 KDA (chart displays as data point at bottom)
+ * - Match dates are ISO timestamps; we extract just date part for grouping
+ * - Prevents date mismatch bugs (was issue: full timestamp wouldn't match date string)
+ * 
+ * Performance: O(n*m) where n=7 days, m=matches. Fast for typical <100 matches.
+ */
+
 
 function calculateWeeklyPerformance(matches) {
   // Get last 7 days

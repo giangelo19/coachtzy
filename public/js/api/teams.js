@@ -1,7 +1,24 @@
 import { supabase } from '../supabase-client.js'
 
 export const teamsAPI = {
-  // Get current team for logged-in user (via profile -> team)
+  
+  /**
+   * Get the authenticated coach's team
+   * 
+   * Critical relationship: teams.coach_id -> profiles.id -> auth.users.id
+   * This 3-table chain is why authentication is required everywhere.
+   * 
+   * RLS Policy (database enforced):
+   * - SELECT allowed WHERE coach_id = auth.uid()
+   * - Coach can only see their own team, never other coaches' teams
+   * 
+   * Why maybeSingle(): New coaches might not have created team yet.
+   * Returns null (not error) if no team exists, allowing "Create Team" flow.
+   * 
+   * Design decision: Teams don't embed players to avoid nested query complexity.
+   * Use playersAPI.getAll() separately for better performance and caching.
+   */
+
   async getCurrent() {
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -53,7 +70,22 @@ export const teamsAPI = {
     }
   },
 
-  // Create team (one team per coach)
+  /**
+   * Create new team for authenticated coach
+   * 
+   * Business rule: One team per coach (enforced in code, not database constraint)
+   * 
+   * Why not database constraint: Allows future feature where coaches could
+   * transfer teams or archive old teams. Enforcing in code gives flexibility.
+   * 
+   * Constraint check: Queries for existing team before insert.
+   * Race condition possible (multiple rapid creates) but unlikely in practice
+   * since team creation is rare, manual operation.
+   * 
+   * coach_id auto-populated: User can't choose which coach to create for.
+   * Always uses auth.uid(), preventing impersonation.
+   */
+  
   async create(teamData) {
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser()

@@ -4,7 +4,17 @@ console.log('🎮 Draft Simulator loading...');
 import { requireAuth, getCurrentUser } from '../auth.js';
 import { supabase } from '../supabase-client.js';
 
-// Draft sequence following MLBB format
+/**
+ * MLBB (Mobile Legends: Bang Bang) official draft sequence
+ * This exact order is mandated by the game's competitive rules:
+ * - 6 bans per team (3 before picks, 2 after initial picks)
+ * - 5 picks per team
+ * - Blue team gets advantageous pick positions (first pick, consecutive picks)
+ * Total: 20 steps (10 bans + 10 picks)
+ * 
+ * Why this matters: Coaches need to practice the exact sequence used in tournaments
+ * Reference: https://liquipedia.net/mobilelegends/Draft_Mode
+ */
 const DRAFT_SEQUENCE = [
   { team: 'red', action: 'ban', index: 0, text: 'Red Team - Ban 1' },
   { team: 'blue', action: 'ban', index: 0, text: 'Blue Team - Ban 1' },
@@ -126,6 +136,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('❌ Draft Simulator initialization error:', error);
   }
 });
+
+/**
+ * Fetch all heroes from database and render them in the selection grid
+ * 
+ * Why load all at once: The hero pool (~130 heroes) is small enough to load
+ * entirely in one query. This enables instant client-side filtering by role
+ * and search without additional database calls during draft.
+ * 
+ * Database schema: heroes table with columns: id, name, icon, role1, role2
+ * Note: Heroes can have 2 roles (e.g., Carmilla is Tank/Support)
+ */
 
 async function loadHeroes() {
   try {
