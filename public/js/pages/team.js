@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
  * Performance note: All queries run sequentially (not parallel) because
  * team_id is needed before players/matches can be fetched with RLS.
  */
+
 async function loadTeamData() {
   try {
     console.log('=== Starting loadTeamData ===');

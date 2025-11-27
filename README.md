@@ -2,11 +2,11 @@
 
 This repository contains a minimal baseline scaffold for CoachTzy — a web tool to help MLBB coaches manage players, matches and simulate drafts.
 
-What’s included
-- Express server: `server/index.js`
-- SQLite DB (better-sqlite3) with migrations: `server/migrate.js`
-- REST endpoints: `server/routes/players.js`, `server/routes/matches.js`, `server/routes/draft.js`
-- Static frontend: `public/index.html`, `public/app.js`, `public/styles.css`
+What's included
+- Supabase backend: PostgreSQL database with Row-Level Security (RLS)
+- Authentication: Supabase Auth with email/password
+- Static frontend: `public/*.html`, `public/styles.css`, `public/js/pages/*.js`
+- Page-specific modules: Each page has its own JavaScript module for better organization
 
 Quick start (Windows PowerShell)
 
