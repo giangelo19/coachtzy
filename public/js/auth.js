@@ -16,19 +16,34 @@ import { supabase, isAuthenticated, getCurrentUser } from './supabase-client.js'
  * 
  * @throws {Error} If credentials invalid or network error
  */
-
-
 export async function login(email, password) {
   try {
+    console.log('🔐 Login attempt starting...');
+    console.log('📧 Email:', email);
+    console.log('🔑 Password length:', password.length);
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     })
     
-    if (error) throw error
+    if (error) {
+      console.error('❌ Supabase auth error details:', {
+        message: error.message,
+        status: error.status,
+        code: error.code,
+        name: error.name,
+        stack: error.stack,
+        fullError: JSON.stringify(error, null, 2)
+      });
+      throw error;
+    }
+    
+    console.log('✅ Login successful!');
     return data
   } catch (error) {
-    console.error('Login error:', error.message)
+    console.error('❌ Login error:', error.message);
+    console.error('❌ Full error object:', error);
     throw error
   }
 }
@@ -49,8 +64,6 @@ export async function login(email, password) {
  * Username handling: If not provided, uses email prefix as fallback.
  * Stored in auth.users.raw_user_meta_data for profile display.
  */
-
-
 export async function signup(email, password, username) {
   try {
     // Sign up the user (profile will be created automatically by database trigger)
@@ -101,8 +114,6 @@ export async function logout() {
  * 
  * @returns {boolean} true if authenticated, never returns false (redirects instead)
  */
-
-
 export async function requireAuth() {
   const authenticated = await isAuthenticated()
   
