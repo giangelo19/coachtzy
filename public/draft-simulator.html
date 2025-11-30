@@ -348,6 +348,225 @@
       </div>
     </div>
 
+    <!-- Save Draft Modal -->
+    <div id="saveDraftModal" class="modal-overlay" style="display: none;">
+      <div class="modal-content save-draft-modal">
+        <div class="modal-header">
+          <h3>Save Draft Theory</h3>
+          <button class="modal-close" id="closeSaveModal">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="draftName">Draft Name *</label>
+            <input type="text" id="draftName" placeholder="e.g., Counter Mage Comp, Tank Meta Draft" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="redTeamName">Red Team Name *</label>
+              <input type="text" id="redTeamName" value="Red Team" required />
+            </div>
+            <div class="form-group">
+              <label for="blueTeamName">Blue Team Name *</label>
+              <input type="text" id="blueTeamName" value="Blue Team" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="draftNotes">Strategy Notes (optional)</label>
+            <textarea id="draftNotes" rows="3" placeholder="Add draft strategy, synergies, or counters..."></textarea>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="cancelSave" class="btn-modal btn-secondary">Cancel</button>
+          <button id="confirmSave" class="btn-modal btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            Save Draft
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Load Draft Modal -->
+    <div id="loadDraftModal" class="modal-overlay" style="display: none;">
+      <div class="modal-content load-draft-modal">
+        <div class="modal-header">
+          <h3>Load Draft Theory</h3>
+          <button class="modal-close" id="closeLoadModal">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="search-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="text" id="draftSearchInput" placeholder="Search drafts..." />
+          </div>
+          <div id="draftListContainer" class="draft-list-container">
+            <div class="loading-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+                <line x1="12" y1="2" x2="12" y2="6"></line>
+                <line x1="12" y1="18" x2="12" y2="22"></line>
+                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+                <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+                <line x1="2" y1="12" x2="6" y2="12"></line>
+                <line x1="18" y1="12" x2="22" y2="12"></line>
+                <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+                <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+              </svg>
+              <p>Loading drafts...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save or Load Choice Modal -->
+    <div id="choiceDraftModal" class="modal-overlay" style="display: none;">
+      <div class="modal-content choice-modal">
+        <div class="modal-header">
+          <h3>Draft Manager</h3>
+          <button class="modal-close" id="closeChoiceModal">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 24px;">
+            What would you like to do with your draft?
+          </p>
+          <div class="choice-cards">
+            <button class="choice-card" id="choiceSaveBtn">
+              <div class="choice-icon save-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                  <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+              </div>
+              <h4>Save Draft</h4>
+              <p>Save your current draft theory for later use</p>
+            </button>
+            <button class="choice-card" id="choiceLoadBtn">
+              <div class="choice-icon load-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </div>
+              <h4>Load Draft</h4>
+              <p>Load a previously saved draft or template</p>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      /* Choice Modal Styles */
+      .choice-modal {
+        width: 90%;
+        max-width: 600px;
+      }
+
+      .choice-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .choice-card {
+        background: var(--bg-card);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 32px 24px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .choice-card:hover {
+        background: var(--bg-container);
+        border-color: var(--accent-blue);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(80, 181, 255, 0.2);
+      }
+
+      .choice-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+      }
+
+      .save-icon {
+        background: linear-gradient(135deg, rgba(80, 181, 255, 0.2), rgba(80, 181, 255, 0.1));
+        color: var(--accent-blue);
+      }
+
+      .load-icon {
+        background: linear-gradient(135deg, rgba(80, 209, 170, 0.2), rgba(80, 209, 170, 0.1));
+        color: var(--success);
+      }
+
+      .choice-card:hover .save-icon {
+        background: linear-gradient(135deg, rgba(80, 181, 255, 0.3), rgba(80, 181, 255, 0.2));
+        box-shadow: 0 4px 16px rgba(80, 181, 255, 0.3);
+      }
+
+      .choice-card:hover .load-icon {
+        background: linear-gradient(135deg, rgba(80, 209, 170, 0.3), rgba(80, 209, 170, 0.2));
+        box-shadow: 0 4px 16px rgba(80, 209, 170, 0.3);
+      }
+
+      .choice-card h4 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .choice-card p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+
+      @media (max-width: 640px) {
+        .choice-cards {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+
     <script type="module" src="/js/load-user-profile.js"></script>
     <script type="module" src="/js/pages/draft-simulator.js"></script>
   </body>

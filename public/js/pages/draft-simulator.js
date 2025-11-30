@@ -43,6 +43,7 @@ let currentStep = 0;
 let allHeroes = [];
 let draftHistory = [];
 let selectedHeroes = new Set();
+let currentDraftId = null;
 
 // Modal helper functions
 function showModal(title, message, type = 'info') {
@@ -174,6 +175,11 @@ async function loadHeroes() {
 }
 
 function renderHeroes(heroes) {
+  if (!heroes || !Array.isArray(heroes)) {
+    console.warn('⚠️ Invalid heroes data provided to renderHeroes');
+    return;
+  }
+  
   console.log('🎨 Rendering heroes...', heroes.length);
   const container = document.getElementById('heroGridContainer');
   if (!container) {
@@ -294,7 +300,12 @@ function selectHero(hero, phase) {
   }
   
   if (currentRole && currentRole !== 'all') {
-    heroesToRender = heroesToRender.filter(h => h.role === currentRole);
+    const roleLower = currentRole.toLowerCase();
+    heroesToRender = heroesToRender.filter(h => {
+      const role1Match = h.role1?.toLowerCase() === roleLower;
+      const role2Match = h.role2?.toLowerCase() === roleLower;
+      return role1Match || role2Match;
+    });
   }
   
   renderHeroes(heroesToRender);
@@ -505,6 +516,41 @@ function setupEventListeners() {
       filterByRole(role);
     });
   });
+
+  // Save/Load button in header
+  const saveLoadBtn = document.querySelector('.header-actions .btn-primary');
+  if (saveLoadBtn) {
+    saveLoadBtn.addEventListener('click', openSaveLoadModal);
+  }
+
+  // Choice modal controls
+  document.getElementById('closeChoiceModal')?.addEventListener('click', closeChoiceModal);
+  document.getElementById('choiceSaveBtn')?.addEventListener('click', () => {
+    closeChoiceModal();
+    openSaveDraftModal();
+  });
+  document.getElementById('choiceLoadBtn')?.addEventListener('click', () => {
+    closeChoiceModal();
+    openLoadDraftModal();
+  });
+
+  // Save modal controls
+  document.getElementById('closeSaveModal')?.addEventListener('click', closeSaveDraftModal);
+  document.getElementById('cancelSave')?.addEventListener('click', closeSaveDraftModal);
+  document.getElementById('confirmSave')?.addEventListener('click', saveDraft);
+
+  // Load modal controls
+  document.getElementById('closeLoadModal')?.addEventListener('click', closeLoadDraftModal);
+
+  // Draft search
+  document.getElementById('draftSearchInput')?.addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    document.querySelectorAll('.draft-item').forEach(item => {
+      const name = item.querySelector('.draft-item-name').textContent.toLowerCase();
+      const meta = item.querySelector('.draft-item-meta').textContent.toLowerCase();
+      item.style.display = (name.includes(searchTerm) || meta.includes(searchTerm)) ? 'flex' : 'none';
+    });
+  });
 }
 
 function filterHeroes(searchTerm) {
@@ -571,4 +617,312 @@ function updateUserProfile(user) {
   if (user?.email) {
     emailElements.forEach(el => el.textContent = user.email);
   }
+}
+
+// Save/Load Draft Functions
+async function openSaveLoadModal() {
+  document.getElementById('choiceDraftModal').style.display = 'flex';
+}
+
+function closeChoiceModal() {
+  document.getElementById('choiceDraftModal').style.display = 'none';
+}
+
+async function saveDraft() {
+  const draftName = document.getElementById('draftName').value.trim();
+  const redTeamName = document.getElementById('redTeamName').value.trim();
+  const blueTeamName = document.getElementById('blueTeamName').value.trim();
+  const notes = document.getElementById('draftNotes').value.trim();
+
+  if (!draftName || !redTeamName || !blueTeamName) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  if (draftHistory.length === 0) {
+    alert('Cannot save an empty draft. Make at least one pick or ban.');
+    return;
+  }
+
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
+    const { data: team } = await supabase
+      .from('teams')
+      .select('id')
+      .eq('coach_id', profile.id)
+      .single();
+
+    if (!team) {
+      alert('No team found. Please create a team first.');
+      return;
+    }
+
+    const { data: draft, error: draftError } = await supabase
+      .from('drafts')
+      .insert({
+        team_id: team.id,
+        draft_name: draftName,
+        red_team_name: redTeamName,
+        blue_team_name: blueTeamName,
+        status: 'completed',
+        notes: notes || null,
+        is_template: false
+      })
+      .select()
+      .single();
+
+    if (draftError) throw draftError;
+
+    const pickRecords = draftHistory.map((pick, index) => ({
+      draft_id: draft.id,
+      hero_id: pick.hero.id,
+      team: pick.team,
+      pick_order: index + 1,
+      pick_type: pick.action,
+      timestamp: new Date().toISOString()
+    }));
+
+    const { error: picksError } = await supabase
+      .from('draft_picks')
+      .insert(pickRecords);
+
+    if (picksError) throw picksError;
+
+    currentDraftId = draft.id;
+    alert('Draft saved successfully!');
+    closeSaveDraftModal();
+  } catch (error) {
+    console.error('Error saving draft:', error);
+    console.error('Error details:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Draft history:', draftHistory);
+    alert(`Failed to save draft: ${error.message || 'Please try again.'}`);
+  }
+}
+
+async function loadDraftList() {
+  const container = document.getElementById('draftListContainer');
+  container.innerHTML = `
+    <div class="loading-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+        <line x1="12" y1="2" x2="12" y2="6"></line>
+        <line x1="12" y1="18" x2="12" y2="22"></line>
+      </svg>
+      <p>Loading drafts...</p>
+    </div>
+  `;
+
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
+    const { data: team } = await supabase
+      .from('teams')
+      .select('id')
+      .eq('coach_id', profile.id)
+      .single();
+
+    if (!team) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          </svg>
+          <p>No team found</p>
+        </div>
+      `;
+      return;
+    }
+
+    const { data: drafts, error } = await supabase
+      .from('drafts')
+      .select('*')
+      .eq('team_id', team.id)
+      .eq('is_template', false)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    if (!drafts || drafts.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          </svg>
+          <p>No saved drafts found</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = drafts.map(draft => `
+      <div class="draft-item" data-draft-id="${draft.id}">
+        <div class="draft-item-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          </svg>
+        </div>
+        <div class="draft-item-info">
+          <div class="draft-item-name">${draft.draft_name}</div>
+          <div class="draft-item-meta">
+            <span>${draft.red_team_name} vs ${draft.blue_team_name}</span>
+            <span>•</span>
+            <span>${new Date(draft.created_at).toLocaleDateString()}</span>
+          </div>
+        </div>
+        <div class="draft-item-actions">
+          <button class="draft-action-btn load" onclick="loadDraft('${draft.id}')" title="Load Draft">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </button>
+          <button class="draft-action-btn delete" onclick="deleteDraft('${draft.id}')" title="Delete Draft">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Error loading drafts:', error);
+    container.innerHTML = `
+      <div class="empty-state">
+        <p style="color: #ff4444;">Failed to load drafts</p>
+      </div>
+    `;
+  }
+}
+
+window.loadDraft = async function(draftId) {
+  try {
+    // Get draft picks
+    const { data: picks, error: picksError } = await supabase
+      .from('draft_picks')
+      .select('*')
+      .eq('draft_id', draftId)
+      .order('pick_order', { ascending: true });
+
+    if (picksError) throw picksError;
+
+    if (!picks || picks.length === 0) {
+      alert('No picks found in this draft.');
+      return;
+    }
+
+    // Get all hero IDs from picks
+    const heroIds = picks.map(p => p.hero_id);
+
+    // Fetch hero data separately
+    const { data: heroes, error: heroesError } = await supabase
+      .from('heroes')
+      .select('*')
+      .in('id', heroIds);
+
+    if (heroesError) throw heroesError;
+
+    // Create hero lookup map
+    const heroMap = {};
+    heroes.forEach(hero => {
+      heroMap[hero.id] = hero;
+    });
+
+    // Reset the draft first
+    resetDraft();
+
+    // Replay each pick in order
+    for (const pick of picks) {
+      const hero = heroMap[pick.hero_id];
+      
+      if (!hero) {
+        console.error('Hero not found for pick:', pick);
+        continue;
+      }
+
+      const heroData = {
+        id: hero.id,
+        name: hero.name,
+        icon: hero.icon,
+        role: hero.role1
+      };
+
+      // Get the current phase
+      const phase = DRAFT_SEQUENCE[currentStep];
+      
+      if (!phase) {
+        console.error('Draft sequence exceeded');
+        break;
+      }
+
+      // Select the hero using the current phase
+      selectHero(heroData, phase);
+    }
+
+    currentDraftId = draftId;
+    closeLoadDraftModal();
+    alert('Draft loaded successfully!');
+  } catch (error) {
+    console.error('Error loading draft:', error);
+    console.error('Error details:', error.message);
+    alert(`Failed to load draft: ${error.message || 'Please try again.'}`);
+  }
+};
+
+window.deleteDraft = async function(draftId) {
+  if (!confirm('Are you sure you want to delete this draft?')) return;
+
+  try {
+    await supabase
+      .from('draft_picks')
+      .delete()
+      .eq('draft_id', draftId);
+
+    const { error } = await supabase
+      .from('drafts')
+      .delete()
+      .eq('id', draftId);
+
+    if (error) throw error;
+
+    loadDraftList();
+
+    alert('Draft deleted successfully!');
+  } catch (error) {
+    console.error('Error deleting draft:', error);
+    alert('Failed to delete draft. Please try again.');
+  }
+};
+
+function openSaveDraftModal() {
+  document.getElementById('saveDraftModal').style.display = 'flex';
+  document.getElementById('draftName').value = '';
+  document.getElementById('redTeamName').value = 'Red Team';
+  document.getElementById('blueTeamName').value = 'Blue Team';
+  document.getElementById('draftNotes').value = '';
+}
+
+function closeSaveDraftModal() {
+  document.getElementById('saveDraftModal').style.display = 'none';
+}
+
+function openLoadDraftModal() {
+  document.getElementById('loadDraftModal').style.display = 'flex';
+  loadDraftList();
+}
+
+function closeLoadDraftModal() {
+  document.getElementById('loadDraftModal').style.display = 'none';
 }
