@@ -49,23 +49,46 @@ export const matchesAPI = {
   // Get single match by ID
   async getById(id) {
     try {
-      const { data, error } = await supabase
+      console.log('Fetching match with ID:', id)
+      
+      // Fetch match data
+      const { data: matchData, error: matchError } = await supabase
         .from('matches')
-        .select(`
-          *,
-          match_players(
-            *,
-            player:players(*),
-            hero:heroes(*)
-          )
-        `)
+        .select('*')
         .eq('id', id)
         .single()
       
-      if (error) throw error
-      return data
+      if (matchError) throw matchError
+      
+      console.log('Match data:', matchData)
+      
+      // Fetch match_players separately
+      const { data: playersData, error: playersError } = await supabase
+        .from('match_players')
+        .select(`
+          *,
+          player:players(*),
+          hero:heroes(*)
+        `)
+        .eq('match_id', id)
+        .order('is_mvp', { ascending: false })
+      
+      if (playersError) throw playersError
+      
+      console.log('Players data:', playersData)
+      
+      // Combine the data
+      const combinedData = {
+        ...matchData,
+        match_players: playersData || []
+      }
+      
+      console.log('Combined data:', combinedData)
+      console.log(`Found ${playersData?.length || 0} players for match ${id}`)
+      
+      return combinedData
     } catch (error) {
-      console.error('Error fetching match:', error.message)
+      console.error('Error fetching match:', error.message, error)
       throw error
     }
   },

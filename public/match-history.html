@@ -189,13 +189,21 @@
             </div>
 
             <div class="form-group">
-              <label for="averageKda">Average Team KDA</label>
-              <input type="number" id="averageKda" name="averageKda" step="0.1" min="0" max="20" placeholder="e.g., 5.4" />
+              <label for="matchDuration">Match Duration</label>
+              <input type="text" id="matchDuration" name="matchDuration" placeholder="e.g., 25:45" />
             </div>
 
             <div class="form-group">
               <label for="notes">Notes</label>
               <textarea id="notes" name="notes" rows="3" placeholder="Add match notes, strategies, observations..."></textarea>
+            </div>
+
+            <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border-color);" />
+
+            <h3 style="margin-bottom: 16px; color: var(--text-primary);">Player Statistics</h3>
+            
+            <div id="playerStatsForm">
+              <!-- Player stats will be loaded dynamically -->
             </div>
 
             <div class="modal-actions">
@@ -276,6 +284,99 @@
               <button type="submit" class="btn-primary">Save Changes</button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <!-- Match Details Modal -->
+      <div id="matchDetailsModal" class="modal">
+        <div class="modal-content match-details-modal">
+          <div class="modal-header">
+            <h2>Match Details</h2>
+            <button class="modal-close" id="closeMatchDetailsModal">&times;</button>
+          </div>
+
+          <div class="modal-body">
+            <!-- Match Summary -->
+            <div class="match-summary">
+              <div class="match-result-header">
+                <span class="result-badge" id="detailsResultBadge">Victory</span>
+                <span class="match-score" id="detailsScore">2 - 1</span>
+                <span class="match-duration" id="detailsDuration">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <span id="detailsDurationText">—</span>
+                </span>
+              </div>
+              <div class="match-meta-info">
+                <span class="match-date" id="detailsDate">October 28, 2024</span>
+                <span class="match-opponent" id="detailsOpponent">vs LNU Falcons</span>
+                <span class="match-type" id="detailsType">Tournament</span>
+              </div>
+            </div>
+
+            <!-- Player Statistics Table -->
+            <div class="player-stats-section">
+              <h3>Player Performance</h3>
+              <div class="stats-table">
+                <div class="stats-header">
+                  <div class="col-player">PLAYER</div>
+                  <div class="col-role">ROLE</div>
+                  <div class="col-hero">HERO</div>
+                  <div class="col-kda">K / D / A</div>
+                  <div class="col-stat">DAMAGE</div>
+                  <div class="col-stat">GOLD</div>
+                  <div class="col-mvp"></div>
+                </div>
+
+                <div id="playerStatsRows">
+                  <!-- Player rows will be dynamically inserted here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Team Statistics Summary -->
+            <div class="team-stats-summary">
+              <h3>Team Statistics</h3>
+              <div class="summary-grid">
+                <div class="summary-card">
+                  <span class="summary-label">Total Kills</span>
+                  <span class="summary-value" id="summaryKills">0</span>
+                </div>
+                <div class="summary-card">
+                  <span class="summary-label">Total Deaths</span>
+                  <span class="summary-value" id="summaryDeaths">0</span>
+                </div>
+                <div class="summary-card">
+                  <span class="summary-label">Total Assists</span>
+                  <span class="summary-value" id="summaryAssists">0</span>
+                </div>
+                <div class="summary-card">
+                  <span class="summary-label">Team KDA</span>
+                  <span class="summary-value" id="summaryKDA">0.0</span>
+                </div>
+                <div class="summary-card">
+                  <span class="summary-label">Total Damage</span>
+                  <span class="summary-value" id="summaryDamage">0</span>
+                </div>
+                <div class="summary-card">
+                  <span class="summary-label">Total Gold</span>
+                  <span class="summary-value" id="summaryGold">0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Match Notes -->
+            <div class="match-notes-section" id="matchNotesSection" style="display: none;">
+              <h3>Match Notes</h3>
+              <div class="notes-content" id="matchNotesContent"></div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn-secondary" id="closeMatchDetailsBtn">Close</button>
+          </div>
         </div>
       </div>
     </div>
