@@ -32,9 +32,21 @@ async function initDashboard() {
 
 // Run immediately if DOM is ready, otherwise wait for it
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initDashboard);
+  document.addEventListener('DOMContentLoaded', () => {
+    showLoadingScreenInitial();
+    initDashboard();
+  });
 } else {
+  showLoadingScreenInitial();
   initDashboard();
+}
+
+function showLoadingScreenInitial() {
+  const loadingScreen = document.getElementById('loadingScreen');
+  if (loadingScreen) {
+    loadingScreen.style.display = 'flex';
+    loadingScreen.style.pointerEvents = 'auto';
+  }
 }
 
 async function loadDashboardData() {
@@ -464,15 +476,55 @@ function setupEventListeners() {
   const userProfileBtn = document.getElementById('userProfileBtn');
   const profileDropdown = document.getElementById('profileDropdown');
 
+  console.log('Setting up event listeners...');
+  console.log('userProfileBtn:', userProfileBtn);
+  console.log('profileDropdown:', profileDropdown);
+
   if (userProfileBtn && profileDropdown) {
-    userProfileBtn.addEventListener('click', (e) => {
+    console.log('✅ Both elements found, adding click listener');
+    
+    // Ensure dropdown starts hidden using inline styles
+    profileDropdown.style.opacity = '0';
+    profileDropdown.style.visibility = 'hidden';
+    profileDropdown.style.transform = 'translateY(-10px)';
+    
+    let isOpen = false;
+    
+    // Prevent dropdown from closing when clicking inside it
+    profileDropdown.addEventListener('click', (e) => {
       e.stopPropagation();
-      profileDropdown.classList.toggle('show');
     });
 
-    document.addEventListener('click', () => {
-      profileDropdown.classList.remove('show');
+    userProfileBtn.addEventListener('click', (e) => {
+      console.log('Profile button clicked!');
+      e.stopPropagation();
+      e.preventDefault();
+      
+      isOpen = !isOpen;
+      
+      if (isOpen) {
+        console.log('Opening dropdown');
+        profileDropdown.style.opacity = '1';
+        profileDropdown.style.visibility = 'visible';
+        profileDropdown.style.transform = 'translateY(0)';
+      } else {
+        console.log('Closing dropdown');
+        profileDropdown.style.opacity = '0';
+        profileDropdown.style.visibility = 'hidden';
+        profileDropdown.style.transform = 'translateY(-10px)';
+      }
     });
+
+    document.addEventListener('click', (e) => {
+      if (!userProfileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+        isOpen = false;
+        profileDropdown.style.opacity = '0';
+        profileDropdown.style.visibility = 'hidden';
+        profileDropdown.style.transform = 'translateY(-10px)';
+      }
+    });
+  } else {
+    console.error('❌ Elements not found!');
   }
 
   // Logout button
@@ -668,9 +720,12 @@ function showEmptyTopPerformers(message = 'No player statistics available for th
 function hideLoadingScreen() {
   const loadingScreen = document.getElementById('loadingScreen');
   if (loadingScreen) {
+    console.log('Hiding loading screen...');
+    loadingScreen.style.pointerEvents = 'none';
     loadingScreen.classList.add('hide');
     setTimeout(() => {
       loadingScreen.style.display = 'none';
+      console.log('Loading screen hidden');
     }, 500);
   }
 }

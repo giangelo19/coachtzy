@@ -190,14 +190,15 @@ header h1 {
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.3s ease;
-  z-index: 1000;
+  z-index: 10000;
   overflow: hidden;
 }
 
 .profile-dropdown.show {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+  display: block !important;
 }
 
 /* Dropdown Header */
@@ -1158,11 +1159,13 @@ header h1 {
   justify-content: center;
   z-index: 9999;
   transition: opacity 0.5s ease, visibility 0.5s ease;
+  pointer-events: auto;
 }
 
 .loading-screen.hide {
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
 }
 
 .loading-content {

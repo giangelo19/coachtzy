@@ -518,13 +518,42 @@ function setupEventListeners() {
   const profileDropdown = document.getElementById('profileDropdown');
 
   if (userProfileBtn && profileDropdown) {
-    userProfileBtn.addEventListener('click', (e) => {
+    // Ensure dropdown starts hidden using inline styles
+    profileDropdown.style.opacity = '0';
+    profileDropdown.style.visibility = 'hidden';
+    profileDropdown.style.transform = 'translateY(-10px)';
+    
+    let isOpen = false;
+    
+    // Prevent dropdown from closing when clicking inside it
+    profileDropdown.addEventListener('click', (e) => {
       e.stopPropagation();
-      profileDropdown.classList.toggle('show');
     });
 
-    document.addEventListener('click', () => {
-      profileDropdown.classList.remove('show');
+    userProfileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      
+      isOpen = !isOpen;
+      
+      if (isOpen) {
+        profileDropdown.style.opacity = '1';
+        profileDropdown.style.visibility = 'visible';
+        profileDropdown.style.transform = 'translateY(0)';
+      } else {
+        profileDropdown.style.opacity = '0';
+        profileDropdown.style.visibility = 'hidden';
+        profileDropdown.style.transform = 'translateY(-10px)';
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!userProfileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+        isOpen = false;
+        profileDropdown.style.opacity = '0';
+        profileDropdown.style.visibility = 'hidden';
+        profileDropdown.style.transform = 'translateY(-10px)';
+      }
     });
   }
 
@@ -601,7 +630,10 @@ function hideLoading() {
   const loadingScreen = document.getElementById('loadingScreen');
   const teamDataContent = document.getElementById('teamDataContent');
   
-  if (loadingScreen) loadingScreen.style.display = 'none';
+  if (loadingScreen) {
+    loadingScreen.style.pointerEvents = 'none';
+    loadingScreen.style.display = 'none';
+  }
   if (teamDataContent) teamDataContent.style.display = 'grid';
 }
 
