@@ -17,6 +17,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Setup event listeners
     setupEventListeners();
+    
+    // Check if there's a match ID in the URL to open
+    const urlParams = new URLSearchParams(window.location.search);
+    const matchId = urlParams.get('match');
+    if (matchId) {
+      // Wait a bit for the page to fully load, then open the modal
+      setTimeout(() => {
+        window.viewMatchDetails(matchId);
+      }, 300);
+    }
   } catch (error) {
     console.error('Match history page initialization error:', error);
   }

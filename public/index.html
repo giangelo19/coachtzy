@@ -381,7 +381,11 @@
         const viewMatchDetailsBtn = document.getElementById('viewMatchDetailsBtn');
         if (viewMatchDetailsBtn) {
           viewMatchDetailsBtn.addEventListener('click', function() {
-            alert('Feature not added yet');
+            if (window.recentMatchId) {
+              window.location.href = `match-history.html?match=${window.recentMatchId}`;
+            } else {
+              window.location.href = 'match-history.html';
+            }
           });
         }
       });

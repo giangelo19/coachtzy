@@ -199,6 +199,9 @@ async function updateRecentMatchCard() {
     const recentMatch = sortedMatches[0];
     console.log('📋 Most recent match:', recentMatch);
     
+    // Store the match ID for the view button
+    window.recentMatchId = recentMatch.id;
+    
     // Update result badge
     const resultBadge = document.querySelector('.recent-match-card .result-badge');
     const isWin = recentMatch.result === 'win' || recentMatch.result === 'victory';
