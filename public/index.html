@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+      <div class="loading-content">
+        <img src="/assets/logo.png" alt="CoachTzy" class="loading-logo" />
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading Dashboard...</p>
+      </div>
+    </div>
+
     <aside class="sidebar">
       <div class="logo">
         <img src="/assets/logo.png" alt="CoachTzy Logo" />
@@ -182,79 +191,23 @@
               </div>
             </div>
 
-            <!-- Upcoming Match Card -->
-            <div class="card upcoming-match-card">
+            <!-- Top Performers Card -->
+            <div class="card top-performers-card">
               <div class="card-header-row">
-                <h2>Upcoming Match</h2>
-                <span class="countdown-badge-new">
+                <h2>Top Performers This Week</h2>
+                <span class="week-badge">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
                   </svg>
-                  In 3 Days
+                  Week 48
                 </span>
               </div>
-              <div class="match-card-content">
-                <div class="match-visual">
-                  <div class="team-side home">
-                    <div class="team-logo">
-                      <img src="/assets/logo.png" alt="Our Team" />
-                    </div>
-                    <span class="team-name">CoachTzy</span>
+              <div class="leaderboard-content">
+                <div id="topPerformersContainer" class="top-performers-list">
+                  <div class="loading-state">
+                    <div class="spinner"></div>
+                    <span>Loading top performers...</span>
                   </div>
-                  <div class="vs-badge">VS</div>
-                  <div class="team-side away">
-                    <div class="team-logo opponent">
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                      </svg>
-                    </div>
-                    <span class="team-name">LNU Falcons</span>
-                  </div>
-                </div>
-                <div class="match-meta">
-                  <div class="meta-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                      <line x1="16" y1="2" x2="16" y2="6"></line>
-                      <line x1="8" y1="2" x2="8" y2="6"></line>
-                      <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    <span>Tuesday, Oct 15</span>
-                  </div>
-                  <div class="meta-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    <span>7:00 PM</span>
-                  </div>
-                  <div class="meta-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                      <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                    <span>Scrim Match</span>
-                  </div>
-                </div>
-                <div class="match-actions">
-                  <button class="btn-action primary-action">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                    View Notes
-                  </button>
-                  <button class="btn-action secondary-action">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="10 8 16 12 10 16 10 8"></polyline>
-                    </svg>
-                    Start Draft
-                  </button>
                 </div>
               </div>
             </div>
@@ -322,7 +275,7 @@
                 </div>
               </div>
             </div>
-            
+          </div>
           </div>
 
           <!-- Weekly Performance Card -->

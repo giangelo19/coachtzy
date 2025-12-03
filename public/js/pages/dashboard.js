@@ -21,8 +21,12 @@ async function initDashboard() {
     setupEventListeners();
     
     console.log('✅ Dashboard initialization complete');
+    
+    // Hide loading screen
+    hideLoadingScreen();
   } catch (error) {
     console.error('❌ Dashboard initialization error:', error);
+    hideLoadingScreen();
   }
 }
 
@@ -46,6 +50,9 @@ async function loadDashboardData() {
     
     // Update weekly performance chart
     await updateWeeklyPerformanceChart();
+    
+    // Update top performers
+    await updateTopPerformers();
     
     // Note: Other dashboard features can be added later
     // const dashboardData = await dashboardAPI.getDashboardData(teamId);
@@ -487,6 +494,185 @@ function showLoading() {
 
 function hideLoading() {
   console.log('Loading complete');
+}
+
+async function updateTopPerformers() {
+  try {
+    console.log('🏆 Fetching top performers...');
+    
+    const { supabase } = await import('../supabase-client.js');
+    
+    // Calculate date 7 days ago (this week)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const dateFilter = sevenDaysAgo.toISOString().split('T')[0];
+    
+    console.log('📅 Fetching matches from:', dateFilter);
+    
+    // First, get matches from the last 7 days
+    const { data: recentMatches, error: matchesError } = await supabase
+      .from('matches')
+      .select('id, match_date')
+      .gte('match_date', dateFilter);
+    
+    if (matchesError) {
+      console.error('Error fetching matches:', matchesError);
+      throw matchesError;
+    }
+    
+    console.log('📋 Recent matches:', recentMatches);
+    
+    if (!recentMatches || recentMatches.length === 0) {
+      console.log('⚠️ No matches found in the last 7 days');
+      showEmptyTopPerformers();
+      return;
+    }
+    
+    const matchIds = recentMatches.map(m => m.id);
+    
+    // Fetch match_players data for these matches
+    const { data: matchPlayers, error } = await supabase
+      .from('match_players')
+      .select(`
+        player_id,
+        kills,
+        deaths,
+        assists,
+        kda,
+        match_id,
+        players(id, name, profile_picture)
+      `)
+      .in('match_id', matchIds);
+    
+    if (error) {
+      console.error('Error fetching player stats:', error);
+      throw error;
+    }
+    
+    console.log('📊 Player stats fetched:', matchPlayers);
+    
+    if (!matchPlayers || matchPlayers.length === 0) {
+      console.log('⚠️ No player stats found');
+      showEmptyTopPerformers();
+      return;
+    }
+    
+    // Group by player and calculate average KDA
+    const playerStats = {};
+    
+    matchPlayers.forEach(mp => {
+      const playerId = mp.player_id;
+      
+      if (!playerStats[playerId]) {
+        playerStats[playerId] = {
+          player: mp.players,
+          totalKda: 0,
+          matchCount: 0,
+          totalKills: 0,
+          totalDeaths: 0,
+          totalAssists: 0
+        };
+      }
+      
+      playerStats[playerId].totalKda += mp.kda || 0;
+      playerStats[playerId].matchCount += 1;
+      playerStats[playerId].totalKills += mp.kills || 0;
+      playerStats[playerId].totalDeaths += mp.deaths || 0;
+      playerStats[playerId].totalAssists += mp.assists || 0;
+    });
+    
+    // Calculate averages and create array
+    const performers = Object.values(playerStats).map(stat => ({
+      player: stat.player,
+      avgKda: stat.totalKda / stat.matchCount,
+      matchCount: stat.matchCount,
+      totalKills: stat.totalKills,
+      totalDeaths: stat.totalDeaths,
+      totalAssists: stat.totalAssists
+    }));
+    
+    // Sort by average KDA descending and get top 3
+    const topPerformers = performers
+      .sort((a, b) => b.avgKda - a.avgKda)
+      .slice(0, 3);
+    
+    console.log('🥇 Top 3 performers:', topPerformers);
+    
+    // Display top performers
+    displayTopPerformers(topPerformers);
+    
+  } catch (error) {
+    console.error('❌ Error updating top performers:', error);
+    showEmptyTopPerformers('Failed to load top performers');
+  }
+}
+
+function displayTopPerformers(performers) {
+  const container = document.getElementById('topPerformersContainer');
+  
+  if (!container) {
+    console.error('Top performers container not found');
+    return;
+  }
+  
+  if (performers.length === 0) {
+    showEmptyTopPerformers();
+    return;
+  }
+  
+  container.innerHTML = performers.map((performer, index) => {
+    const rank = index + 1;
+    const kdaColor = performer.avgKda >= 3 ? '#50d1aa' : performer.avgKda >= 2 ? '#50b5ff' : '#ffa500';
+    
+    return `
+      <div class="performer-item rank-${rank}">
+        <div class="rank-badge rank-${rank}">${rank}</div>
+        <img 
+          src="${performer.player.profile_picture || '/assets/default_pfp.png'}" 
+          alt="${performer.player.name}" 
+          class="performer-avatar"
+          onerror="this.src='/assets/default_pfp.png'"
+        />
+        <div class="performer-info">
+          <div class="performer-name">${performer.player.name}</div>
+          <div class="performer-stats">
+            <span>${performer.totalKills} / ${performer.totalDeaths} / ${performer.totalAssists}</span>
+          </div>
+        </div>
+        <div class="performer-kda">
+          <div class="kda-value" style="color: ${kdaColor}">${performer.avgKda.toFixed(2)}</div>
+          <div class="kda-label">Avg KDA</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  console.log('✅ Top performers displayed');
+}
+
+function showEmptyTopPerformers(message = 'No player statistics available for this week') {
+  const container = document.getElementById('topPerformersContainer');
+  
+  if (!container) return;
+  
+  container.innerHTML = `
+    <div class="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
+      </svg>
+      <div class="empty-state-text">${message}<br>Add match results with player statistics to see the leaderboard.</div>
+    </div>
+  `;
+}
+
+function hideLoadingScreen() {
+  const loadingScreen = document.getElementById('loadingScreen');
+  if (loadingScreen) {
+    loadingScreen.classList.add('hide');
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+    }, 500);
+  }
 }
 
 function showError(message) {
