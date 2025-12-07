@@ -562,7 +562,6 @@ async function openEditModal(player) {
     document.getElementById('editPlayerKDA').value = player.average_kda || '';
     document.getElementById('editPlayerWinrate').value = player.winrate || '';
     document.getElementById('editPlayerStatus').value = player.status;
-    document.getElementById('editPlayerTeam').value = player.team_id || '';
     
     // Load player's current heroes
     selectedHeroes = [];
@@ -747,7 +746,6 @@ async function handleEditPlayer(form) {
             name: formData.get('playerName').trim(),
             role: formData.get('playerRole'),
             status: formData.get('playerStatus'),
-            team_id: formData.get('playerTeam') || null,
             average_kda: formData.get('playerKDA') ? parseFloat(formData.get('playerKDA')) : null,
             winrate: formData.get('playerWinrate') ? parseFloat(formData.get('playerWinrate')) : null
         };
