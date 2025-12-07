@@ -10,7 +10,11 @@ let currentEditingMatchId = null;
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     // Protect this page
-    await requireAuth();
+    const isAuthenticated = await requireAuth();
+    if (!isAuthenticated) {
+      console.log('Not authenticated, stopping initialization');
+      return;
+    }
     
     // Load matches from database
     await loadMatches();

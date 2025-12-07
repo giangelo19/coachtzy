@@ -16,7 +16,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     // Protect this page
     console.log('🔒 Checking authentication...');
-    await requireAuth();
+    const isAuthenticated = await requireAuth();
+    if (!isAuthenticated) {
+      console.log('Not authenticated, stopping initialization');
+      return;
+    }
     console.log('✅ Authentication passed');
     
     // Get current user info
@@ -780,13 +784,37 @@ async function openEditTeamModal() {
   // Get current team data
   currentTeam = await teamsAPI.getCurrent();
   
+  // If no team exists, create a placeholder team automatically
   if (!currentTeam) {
-    showError('No team found. Please create a team first.');
-    return;
+    console.log('No team found, creating placeholder team...');
+    try {
+      const user = await getCurrentUser();
+      const { data: newTeam, error } = await supabase
+        .from('teams')
+        .insert({
+          coach_id: user.id,
+          team_name: `${user.username || 'My'} Team`,
+          description: 'Update your team description'
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      currentTeam = newTeam;
+      console.log('Placeholder team created:', newTeam);
+      
+      // Reload the page to show the new team
+      await loadTeamData();
+    } catch (error) {
+      console.error('Error creating team:', error);
+      showError('Failed to create team. Please try again.');
+      return;
+    }
   }
   
   // Populate form with current team data
-  document.getElementById('editTeamName').value = currentTeam.name || '';
+  document.getElementById('editTeamName').value = currentTeam.team_name || '';
   document.getElementById('editTeamAcronym').value = currentTeam.acronym || '';
   document.getElementById('editEstablishedYear').value = currentTeam.established_year || '';
   document.getElementById('editCountry').value = currentTeam.country || '';

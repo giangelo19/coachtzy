@@ -3,12 +3,19 @@ import { requireAuth, getCurrentUser } from '../auth.js';
 import { dashboardAPI } from '../api/dashboard.js';
 import { matchesAPI } from '../api/matches.js';
 
-// Protect this page - redirect to login if not authenticated
-await requireAuth();
-
 async function initDashboard() {
   try {
     console.log('🚀 Dashboard initialization starting...');
+    
+    // Protect this page - redirect to login if not authenticated
+    const isAuthenticated = await requireAuth();
+    if (!isAuthenticated) {
+      console.log('Not authenticated, stopping initialization');
+      return;
+    }
+    
+    // Show loading states
+    showLoadingScreenInitial();
     
     // Get current user info
     const user = await getCurrentUser();
@@ -28,12 +35,8 @@ async function initDashboard() {
 
 // Run immediately if DOM is ready, otherwise wait for it
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    showLoadingScreenInitial();
-    initDashboard();
-  });
+  document.addEventListener('DOMContentLoaded', initDashboard);
 } else {
-  showLoadingScreenInitial();
   initDashboard();
 }
 

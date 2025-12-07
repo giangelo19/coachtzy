@@ -66,7 +66,7 @@ export async function login(email, password) {
  */
 export async function signup(email, password, username) {
   try {
-    // Sign up the user (profile will be created automatically by database trigger)
+    // Sign up the user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -78,6 +78,41 @@ export async function signup(email, password, username) {
     })
     
     if (authError) throw authError
+    
+    // If signup successful and user is created, create coach profile and team
+    if (authData.user) {
+      console.log('Creating coach profile and team for new user:', authData.user.id);
+      
+      // Create coach profile
+      const { error: coachError } = await supabase
+        .from('coaches')
+        .insert({
+          id: authData.user.id,
+          username: username || email.split('@')[0],
+          email: email
+        });
+      
+      if (coachError && coachError.code !== '23505') { // Ignore duplicate key error
+        console.error('Error creating coach profile:', coachError);
+      }
+      
+      // Create placeholder team for the coach
+      const { data: teamData, error: teamError } = await supabase
+        .from('teams')
+        .insert({
+          coach_id: authData.user.id,
+          team_name: `${username || email.split('@')[0]}'s Team`,
+          description: 'Update your team description'
+        })
+        .select()
+        .single();
+      
+      if (teamError) {
+        console.error('Error creating team:', teamError);
+      } else {
+        console.log('Team created successfully:', teamData);
+      }
+    }
     
     return authData
   } catch (error) {
@@ -100,6 +135,9 @@ export async function logout() {
   }
 }
 
+// Flag to prevent multiple simultaneous auth checks
+let isCheckingAuth = false;
+
 /**
  * Guard function to protect pages requiring authentication
  * 
@@ -115,14 +153,43 @@ export async function logout() {
  * @returns {boolean} true if authenticated, never returns false (redirects instead)
  */
 export async function requireAuth() {
-  const authenticated = await isAuthenticated()
-  
-  if (!authenticated) {
-    window.location.href = '/login.html'
-    return false
+  // Prevent multiple simultaneous checks
+  if (isCheckingAuth) {
+    console.log('Auth check already in progress, waiting...');
+    return false;
   }
-  
-  return true
+
+  isCheckingAuth = true;
+
+  try {
+    const currentPath = window.location.pathname;
+    const isLoginPage = currentPath.endsWith('login.html');
+    
+    console.log('🔒 Auth guard - Current path:', currentPath);
+    
+    // Don't check auth on login page
+    if (isLoginPage) {
+      console.log('On login page, skipping auth check');
+      isCheckingAuth = false;
+      return true;
+    }
+
+    const authenticated = await isAuthenticated();
+    console.log('Auth status:', authenticated ? 'Authenticated' : 'Not authenticated');
+    
+    if (!authenticated) {
+      console.log('Not authenticated, redirecting to login...');
+      window.location.replace('/login.html');
+      return false;
+    }
+    
+    isCheckingAuth = false;
+    return true;
+  } catch (error) {
+    console.error('Auth check error:', error);
+    isCheckingAuth = false;
+    return false;
+  }
 }
 
 // Get session
