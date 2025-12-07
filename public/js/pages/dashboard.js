@@ -188,6 +188,23 @@ async function updateRecentMatchCard() {
     
     if (allMatches.length === 0) {
       console.log('⚠️ No matches found');
+      
+      // Show empty state message
+      const matchCardContent = document.querySelector('.recent-match-card .match-card-content');
+      if (matchCardContent) {
+        matchCardContent.innerHTML = `
+          <div class="empty-state" style="padding: 40px 20px; text-align: center;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.3; margin-bottom: 16px;">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <div style="color: var(--text-secondary); font-size: 16px; font-weight: 500;">No recent match</div>
+            <div style="color: var(--text-muted); font-size: 14px; margin-top: 8px;">Add match results to see your recent matches here</div>
+          </div>
+        `;
+      }
+      
+      hideCardLoading('recentMatchLoading');
       return;
     }
     
