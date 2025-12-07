@@ -262,13 +262,22 @@ async function loadPlayerStatsForm() {
       return;
     }
     
-    container.innerHTML = players.map((player, index) => `
+    // Create 5 player slots with dropdowns
+    container.innerHTML = Array.from({ length: 5 }, (_, index) => `
       <div class="player-stat-form-card" style="background: var(--bg-card-dark); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-        <h4 style="margin-bottom: 12px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-          <img src="${player.profile_picture || '/assets/default_pfp.png'}" alt="${player.name}" style="width: 24px; height: 24px; border-radius: 50%;" onerror="this.src='/assets/default_pfp.png'" />
-          ${player.name}
+        <h4 style="margin-bottom: 12px; color: var(--text-primary);">
+          Player ${index + 1}
         </h4>
-        <input type="hidden" name="player_${index}_id" value="${player.id}" />
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="player_${index}_id">Select Player*</label>
+            <select id="player_${index}_id" name="player_${index}_id" required onchange="updatePlayerImage(${index})">
+              <option value="">Choose a player</option>
+              ${players.map(player => `<option value="${player.id}" data-image="${player.profile_picture || '/assets/default_pfp.png'}">${player.name}</option>`).join('')}
+            </select>
+          </div>
+        </div>
         
         <div class="form-row">
           <div class="form-group">
@@ -331,6 +340,70 @@ async function loadPlayerStatsForm() {
   }
 }
 
+// Update player image when player is selected
+function updatePlayerImage(index) {
+  const select = document.getElementById(`player_${index}_id`);
+  const selectedOption = select.options[select.selectedIndex];
+  const imageUrl = selectedOption.getAttribute('data-image');
+  
+  // Update the header to show player name and image
+  const card = select.closest('.player-stat-form-card');
+  const header = card.querySelector('h4');
+  
+  if (selectedOption.value && imageUrl) {
+    const playerName = selectedOption.text;
+    header.innerHTML = `
+      <img src="${imageUrl}" alt="${playerName}" style="width: 24px; height: 24px; border-radius: 50%;" onerror="this.src='/assets/default_pfp.png'" />
+      ${playerName}
+    `;
+  } else {
+    header.innerHTML = `Player ${index + 1}`;
+  }
+  
+  // Update other player dropdowns to exclude selected players
+  updatePlayerDropdowns();
+}
+
+// Update all player dropdowns to disable already selected players
+function updatePlayerDropdowns() {
+  // Get all selected player IDs
+  const selectedPlayerIds = [];
+  for (let i = 0; i < 5; i++) {
+    const select = document.getElementById(`player_${i}_id`);
+    if (select && select.value) {
+      selectedPlayerIds.push(select.value);
+    }
+  }
+  
+  // Update each dropdown
+  for (let i = 0; i < 5; i++) {
+    const select = document.getElementById(`player_${i}_id`);
+    if (!select) continue;
+    
+    const currentValue = select.value;
+    
+    // Enable/disable options based on selection
+    Array.from(select.options).forEach(option => {
+      if (option.value === '') {
+        // Keep the empty option enabled
+        option.disabled = false;
+      } else if (option.value === currentValue) {
+        // Keep current selection enabled
+        option.disabled = false;
+      } else if (selectedPlayerIds.includes(option.value)) {
+        // Disable if selected in another dropdown
+        option.disabled = true;
+      } else {
+        // Enable if not selected anywhere
+        option.disabled = false;
+      }
+    });
+  }
+}
+
+// Make function globally accessible
+window.updatePlayerImage = updatePlayerImage;
+
 // Handle Add Match form submission
 async function handleAddMatch(e) {
   e.preventDefault();
@@ -352,14 +425,39 @@ async function handleAddMatch(e) {
   
   // Collect player stats
   const playerStats = [];
+  const selectedPlayerIds = [];
+  const selectedRoles = [];
   let mvpCount = 0;
   let playerIndex = 0;
   
   while (formData.has(`player_${playerIndex}_id`)) {
+    const playerId = formData.get(`player_${playerIndex}_id`);
+    const role = formData.get(`player_${playerIndex}_role`);
+    
+    // Validate player selection
+    if (!playerId) {
+      alert(`Please select a player for Player ${playerIndex + 1}`);
+      return;
+    }
+    
+    // Check for duplicate players
+    if (selectedPlayerIds.includes(playerId)) {
+      alert('Each player can only be selected once. Please choose different players.');
+      return;
+    }
+    selectedPlayerIds.push(playerId);
+    
+    // Check for duplicate roles
+    if (role && selectedRoles.includes(role)) {
+      alert(`The role "${role.replace('_', ' ')}" has already been assigned. Each player must have a unique role.`);
+      return;
+    }
+    if (role) selectedRoles.push(role);
+    
     const stats = {
-      player_id: formData.get(`player_${playerIndex}_id`),
+      player_id: playerId,
       hero_id: formData.get(`player_${playerIndex}_hero`),
-      role: formData.get(`player_${playerIndex}_role`),
+      role: role,
       kills: parseInt(formData.get(`player_${playerIndex}_kills`)),
       deaths: parseInt(formData.get(`player_${playerIndex}_deaths`)),
       assists: parseInt(formData.get(`player_${playerIndex}_assists`)),
@@ -370,7 +468,7 @@ async function handleAddMatch(e) {
     
     // Validate player stats
     if (!stats.hero_id || !stats.role) {
-      alert(`Please select a hero and role for player ${playerIndex + 1}`);
+      alert(`Please select a hero and role for Player ${playerIndex + 1}`);
       return;
     }
     
@@ -378,6 +476,12 @@ async function handleAddMatch(e) {
     
     playerStats.push(stats);
     playerIndex++;
+  }
+  
+  // Validate we have exactly 5 players
+  if (playerStats.length !== 5) {
+    alert('Please fill in all 5 player slots');
+    return;
   }
   
   // Validate MVP selection

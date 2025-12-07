@@ -21,12 +21,8 @@ async function initDashboard() {
     setupEventListeners();
     
     console.log('✅ Dashboard initialization complete');
-    
-    // Hide loading screen
-    hideLoadingScreen();
   } catch (error) {
     console.error('❌ Dashboard initialization error:', error);
-    hideLoadingScreen();
   }
 }
 
@@ -42,39 +38,40 @@ if (document.readyState === 'loading') {
 }
 
 function showLoadingScreenInitial() {
-  const loadingScreen = document.getElementById('loadingScreen');
-  if (loadingScreen) {
-    loadingScreen.style.display = 'flex';
-    loadingScreen.style.pointerEvents = 'auto';
+  // Show individual card loading states
+  const loadingStates = ['winrateLoading', 'recentMatchLoading', 'performanceLoading', 'topPerformersContainer'];
+  loadingStates.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.classList.remove('hide');
+    }
+  });
+}
+
+function showCardLoading(cardId) {
+  const element = document.getElementById(cardId);
+  if (element) {
+    element.classList.remove('hide');
+  }
+}
+
+function hideCardLoading(cardId) {
+  const element = document.getElementById(cardId);
+  if (element) {
+    element.classList.add('hide');
   }
 }
 
 async function loadDashboardData() {
   try {
-    // Show loading state
-    showLoading();
-
-    // Calculate winrate from actual matches
-    await updateWinrateCard();
+    // Load all cards in parallel with their own loading states
+    await Promise.all([
+      updateWinrateCard(),
+      updateRecentMatchCard(),
+      updateWeeklyPerformanceChart(),
+      updateTopPerformers()
+    ]);
     
-    // Update recent match card
-    await updateRecentMatchCard();
-    
-    // Update weekly performance chart
-    await updateWeeklyPerformanceChart();
-    
-    // Update top performers
-    await updateTopPerformers();
-    
-    // Note: Other dashboard features can be added later
-    // const dashboardData = await dashboardAPI.getDashboardData(teamId);
-    // const recentMatches = await matchesAPI.getRecent(5);
-    // updateTeamStats(dashboardData.teamStats);
-    // updatePlayerCards(dashboardData.topPlayers);
-    // updateRecentMatches(recentMatches);
-    // updateWeeklyPerformance(dashboardData.weeklyPerformance);
-
-    hideLoading();
   } catch (error) {
     console.error('Error loading dashboard data:', error);
     showError('Failed to load dashboard data. Please refresh the page.');
@@ -95,6 +92,7 @@ function updateUserProfile(user) {
 }
 
 async function updateWinrateCard() {
+  showCardLoading('winrateLoading');
   try {
     // Import matches API - using default import
     const matchesModule = await import('../api/matches.js');
@@ -172,12 +170,16 @@ async function updateWinrateCard() {
     } else {
       console.log('⚠️ No matches found in last 30 days, keeping default values');
     }
+    
+    hideCardLoading('winrateLoading');
   } catch (error) {
     console.error('❌ Error updating winrate card:', error);
+    hideCardLoading('winrateLoading');
   }
 }
 
 async function updateRecentMatchCard() {
+  showCardLoading('recentMatchLoading');
   try {
     console.log('🎮 Fetching recent match...');
     
@@ -258,12 +260,15 @@ async function updateRecentMatchCard() {
     }
     
     console.log('✅ Recent match card updated');
+    hideCardLoading('recentMatchLoading');
   } catch (error) {
     console.error('❌ Error updating recent match card:', error);
+    hideCardLoading('recentMatchLoading');
   }
 }
 
 async function updateWeeklyPerformanceChart() {
+  showCardLoading('performanceLoading');
   try {
     console.log('📊 Calculating weekly performance...');
     
@@ -386,8 +391,10 @@ async function updateWeeklyPerformanceChart() {
     });
     
     console.log('✅ Weekly performance chart updated');
+    hideCardLoading('performanceLoading');
   } catch (error) {
     console.error('❌ Error updating weekly performance chart:', error);
+    hideCardLoading('performanceLoading');
   }
 }
 
@@ -552,6 +559,7 @@ function hideLoading() {
 }
 
 async function updateTopPerformers() {
+  showCardLoading('topPerformersLoading');
   try {
     console.log('🏆 Fetching top performers...');
     
@@ -655,10 +663,12 @@ async function updateTopPerformers() {
     
     // Display top performers
     displayTopPerformers(topPerformers);
+    hideCardLoading('topPerformersLoading');
     
   } catch (error) {
     console.error('❌ Error updating top performers:', error);
     showEmptyTopPerformers('Failed to load top performers');
+    hideCardLoading('topPerformersLoading');
   }
 }
 
@@ -718,6 +728,7 @@ function showEmptyTopPerformers(message = 'No player statistics available for th
       <div class="empty-state-text">${message}<br>Add match results with player statistics to see the leaderboard.</div>
     </div>
   `;
+  hideCardLoading('topPerformersLoading');
 }
 
 function hideLoadingScreen() {

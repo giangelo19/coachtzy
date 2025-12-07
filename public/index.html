@@ -105,6 +105,10 @@
             
             <!-- Winrate Card -->
             <div class="card winrate-card">
+              <div class="card-loading-state" id="winrateLoading">
+                <div class="spinner"></div>
+                <span>Loading winrate...</span>
+              </div>
               <div class="winrate-header">
                 <h2>Overall Winrate</h2>
                 <span class="winrate-subtitle">Last 30 Days</span>
@@ -168,6 +172,10 @@
 
             <!-- Top Performers Card -->
             <div class="card top-performers-card">
+              <div class="card-loading-state" id="topPerformersLoading">
+                <div class="spinner"></div>
+                <span>Loading top performers...</span>
+              </div>
               <div class="card-header-row">
                 <h2>Top Performers This Week</h2>
                 <span class="week-badge">
@@ -179,16 +187,16 @@
               </div>
               <div class="leaderboard-content">
                 <div id="topPerformersContainer" class="top-performers-list">
-                  <div class="loading-state">
-                    <div class="spinner"></div>
-                    <span>Loading top performers...</span>
-                  </div>
                 </div>
               </div>
             </div>
 
             <!-- Recent Match Card -->
             <div class="card recent-match-card">
+              <div class="card-loading-state" id="recentMatchLoading">
+                <div class="spinner"></div>
+                <span>Loading recent match...</span>
+              </div>
               <div class="card-header-row">
                 <h2>Recent Match</h2>
                 <span class="result-badge win-badge">
@@ -255,6 +263,10 @@
 
           <!-- Weekly Performance Card -->
           <div class="card performance-card-new">
+            <div class="card-loading-state" id="performanceLoading">
+              <div class="spinner"></div>
+              <span>Loading performance...</span>
+            </div>
             <div class="performance-header-new">
               <div class="header-left">
                 <h2>Weekly Performance</h2>
@@ -390,15 +402,6 @@
         }
       });
     </script>
-    
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="loading-screen">
-      <div class="loading-content">
-        <img src="/assets/logo.png" alt="CoachTzy" class="loading-logo" />
-        <div class="loading-spinner"></div>
-        <p class="loading-text">Loading Dashboard...</p>
-      </div>
-    </div>
     
     <script type="module" src="js/pages/dashboard.js"></script>
   </body>

@@ -104,18 +104,14 @@
       </header>
 
       <main class="team-content">
-        <!-- Loading Screen -->
-        <div id="loadingScreen" class="loading-screen">
-          <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p>Loading team data...</p>
-          </div>
-        </div>
-
-        <div id="teamDataContent" class="team-grid" style="display: none;">
+        <div id="teamDataContent" class="team-grid">
           
           <!-- Team Profile Card -->
           <div class="card team-profile-card">
+            <div class="card-loading-state" id="teamProfileLoading">
+              <div class="spinner"></div>
+              <span>Loading team profile...</span>
+            </div>
             <div class="team-banner"></div>
             <div class="team-profile-content">
               <div class="team-logo-wrapper">
@@ -155,6 +151,10 @@
 
           <!-- Team Statistics Cards -->
           <div class="card team-stat-card wins-card">
+            <div class="card-loading-state" id="winsLoading">
+              <div class="spinner"></div>
+              <span>Loading...</span>
+            </div>
             <div class="stat-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2">
                 <polyline points="20 6 9 17 4 12"></polyline>
@@ -167,6 +167,10 @@
           </div>
 
           <div class="card team-stat-card losses-card">
+            <div class="card-loading-state" id="lossesLoading">
+              <div class="spinner"></div>
+              <span>Loading...</span>
+            </div>
             <div class="stat-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -180,6 +184,10 @@
           </div>
 
           <div class="card team-stat-card kda-card">
+            <div class="card-loading-state" id="kdaLoading">
+              <div class="spinner"></div>
+              <span>Loading...</span>
+            </div>
             <div class="stat-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
@@ -192,6 +200,10 @@
           </div>
 
           <div class="card team-stat-card winrate-card">
+            <div class="card-loading-state" id="winrateStatsLoading">
+              <div class="spinner"></div>
+              <span>Loading...</span>
+            </div>
             <div class="stat-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-orange)" stroke-width="2">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -206,6 +218,10 @@
 
           <!-- Current Roster Card -->
           <div class="card roster-card-new">
+            <div class="card-loading-state" id="rosterLoading">
+              <div class="spinner"></div>
+              <span>Loading roster...</span>
+            </div>
             <div class="card-header">
               <h2>Current Roster</h2>
               <span class="roster-count" id="rosterCount">0 Players</span>
@@ -217,6 +233,10 @@
 
           <!-- Weekly Performance Card -->
           <div class="card performance-card team-performance">
+            <div class="card-loading-state" id="teamPerformanceLoading">
+              <div class="spinner"></div>
+              <span>Loading performance...</span>
+            </div>
             <div class="performance-header">
               <h2>Weekly Performance</h2>
               <div class="legend-item">

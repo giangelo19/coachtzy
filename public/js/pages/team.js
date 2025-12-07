@@ -69,33 +69,39 @@ async function loadTeamData() {
     if (team) {
       console.log('Team found, loading data...');
       
-      // Load players first to get count
-      console.log('Fetching players...');
-      const players = await playersAPI.getAll();
+      // Load players and matches in parallel
+      const [players, matches] = await Promise.all([
+        playersAPI.getAll(),
+        matchesAPI.getAll()
+      ]);
+      
       console.log('Players result:', players);
       console.log('Number of players:', players ? players.length : 0);
+      console.log('Matches result:', matches);
+      console.log('Number of matches:', matches ? matches.length : 0);
       
       // Update team profile with player count
       updateTeamProfile(team, players ? players.length : 0);
-      
-      // Fetch matches to calculate stats
-      console.log('Fetching matches...');
-      const matches = await matchesAPI.getAll();
-      console.log('Matches result:', matches);
-      console.log('Number of matches:', matches ? matches.length : 0);
+      hideCardLoading('teamProfileLoading');
       
       // Calculate stats from matches
       const stats = calculateTeamStats(matches || []);
       console.log('Calculated stats:', stats);
       updateTeamStats(stats);
+      hideCardLoading('winsLoading');
+      hideCardLoading('lossesLoading');
+      hideCardLoading('kdaLoading');
+      hideCardLoading('winrateStatsLoading');
       
       // Calculate and update weekly performance
       const weeklyData = calculateWeeklyPerformance(matches || []);
       console.log('Weekly performance data:', weeklyData);
       updateWeeklyPerformanceChart(weeklyData);
+      hideCardLoading('teamPerformanceLoading');
       
       // Update roster
       updateRoster(players || []);
+      hideCardLoading('rosterLoading');
     } else {
       console.log('No team found, showing no team message');
       showNoTeamMessage();
@@ -618,23 +624,34 @@ function setupEventListeners() {
 
 function showLoading() {
   console.log('Loading team data...');
-  const loadingScreen = document.getElementById('loadingScreen');
-  const teamDataContent = document.getElementById('teamDataContent');
-  
-  if (loadingScreen) loadingScreen.style.display = 'flex';
-  if (teamDataContent) teamDataContent.style.display = 'none';
+  // Show all card loading states
+  const loadingIds = ['teamProfileLoading', 'winsLoading', 'lossesLoading', 'kdaLoading', 
+                      'winrateStatsLoading', 'rosterLoading', 'teamPerformanceLoading'];
+  loadingIds.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.classList.remove('hide');
+  });
 }
 
 function hideLoading() {
   console.log('Loading complete');
-  const loadingScreen = document.getElementById('loadingScreen');
-  const teamDataContent = document.getElementById('teamDataContent');
-  
-  if (loadingScreen) {
-    loadingScreen.style.pointerEvents = 'none';
-    loadingScreen.style.display = 'none';
-  }
-  if (teamDataContent) teamDataContent.style.display = 'grid';
+  // Hide all card loading states
+  const loadingIds = ['teamProfileLoading', 'winsLoading', 'lossesLoading', 'kdaLoading', 
+                      'winrateStatsLoading', 'rosterLoading', 'teamPerformanceLoading'];
+  loadingIds.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.classList.add('hide');
+  });
+}
+
+function showCardLoading(cardId) {
+  const element = document.getElementById(cardId);
+  if (element) element.classList.remove('hide');
+}
+
+function hideCardLoading(cardId) {
+  const element = document.getElementById(cardId);
+  if (element) element.classList.add('hide');
 }
 
 function showError(message) {
