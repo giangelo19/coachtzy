@@ -1,36 +1,147 @@
-# CoachTzy - Baseline Scaffold
+# CoachTzy
 
-This repository contains a minimal baseline scaffold for CoachTzy — a web tool to help MLBB coaches manage players, matches and simulate drafts.
+CoachTzy is a web application designed for Mobile Legends: Bang Bang (MLBB) coaches to manage player data, track match results, analyze performance, and simulate drafts. Built with Supabase backend and vanilla JavaScript frontend.
 
-What's included
-- Supabase backend: PostgreSQL database with Row-Level Security (RLS)
-- Authentication: Supabase Auth with email/password
-- Static frontend: `public/*.html`, `public/styles.css`, `public/js/pages/*.js`
-- Page-specific modules: Each page has its own JavaScript module for better organization
+## Features
 
-Quick start (Windows PowerShell)
+- **Player Management**: Track player profiles, roles, and hero pools
+- **Team Management**: Organize team rosters and player information
+- **Match History**: Record and analyze scrim and tournament results
+- **Performance Analytics**: View winrates, KDA statistics, and performance trends
+- **Draft Simulator**: Practice and analyze hero picks and bans
 
-1. Install dependencies
+## Tech Stack
 
-```powershell
+- **Frontend**: Vanilla JavaScript (ES6 modules), HTML5, CSS3
+- **Build Tool**: Vite
+- **Backend**: Supabase (PostgreSQL with Row-Level Security)
+- **Authentication**: Supabase Auth (email/password)
+- **Deployment**: Netlify
+
+## Project Structure
+
+```
+coachtzy/
+├── public/                 # Source files (Vite root)
+│   ├── *.html             # Page templates
+│   ├── styles.css         # Global styles
+│   ├── assets/            # Images and static files
+│   │   └── heroes/        # Hero icons (130+ heroes)
+│   └── js/
+│       ├── auth.js        # Authentication logic
+│       ├── supabase-client.js  # Supabase configuration
+│       ├── config.js      # Environment config
+│       ├── api/           # API modules
+│       └── pages/         # Page-specific JavaScript
+├── dist/                  # Build output (generated)
+├── vite.config.js         # Vite configuration
+├── netlify.toml           # Netlify deployment config
+└── package.json
+```
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+- A Supabase account and project
+
+### Installation
+
+1. **Clone the repository**
+
+```bash
+git clone https://github.com/giangelo19/coachtzy.git
+cd coachtzy
+```
+
+2. **Install dependencies**
+
+```bash
 npm install
 ```
 
-2. Run migrations (creates `data/coachtzy.db`)
+3. **Set up environment variables**
 
-```powershell
-npm run migrate
+Create a `.env` file in the root directory:
+
+```env
+# Supabase Configuration
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-3. Start server
+Replace with your actual Supabase credentials from your project settings.
 
-```powershell
-npm start
+4. **Run the development server**
+
+```bash
+npm run dev
 ```
 
-Open http://localhost:3000 in a browser.
+The application will open at `http://localhost:5173/login.html`
 
-Notes
-- This is a baseline. Improve security, add validation, authentication, and richer UI as next steps.
-# coachtzy
-CoachTzy is a web app that helps MLBB coaches manage player data, track match results, and simulate drafts. It stores player profiles, scrim and tournament history, and draft records in a database, offering a structured tool for performance analysis and data-driven coaching decisions.
+### Available Scripts
+
+- `npm run dev` - Start Vite development server with hot reload
+- `npm run build` - Build for production (outputs to `dist/`)
+- `npm run preview` - Preview production build locally
+
+## Development
+
+### Running Locally
+
+1. Start the dev server: `npm run dev`
+2. The app will open at `http://localhost:5173`
+3. Login page loads by default
+4. Use your Supabase credentials to log in
+
+### Building for Production
+
+```bash
+npm run build
+```
+
+This will:
+- Bundle all JavaScript modules
+- Process CSS and assets
+- Copy hero icons and static assets
+- Generate optimized HTML files
+- Output everything to `dist/` folder
+
+## Deployment
+
+The project is configured for deployment on Netlify.
+
+### Deploy to Netlify
+
+1. **Connect your repository** to Netlify
+2. **Set environment variables** in Netlify dashboard:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+3. **Build settings** (already configured in `netlify.toml`):
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+4. **Deploy** - Netlify will auto-deploy on push to `main` branch
+
+Live site: [https://coachtzy.netlify.app](https://coachtzy.netlify.app)
+
+## Security Notes
+
+- Environment variables are used for all sensitive credentials
+- Supabase anon key is safe to expose (client-side usage only)
+- Row-Level Security (RLS) policies protect database access
+- Never commit `.env` file to version control
+
+## Contributing
+
+This is a personal project, but suggestions and feedback are welcome!
+
+## License
+
+MIT
+
+## Author
+
+Gian Angelo S. Tongzon
