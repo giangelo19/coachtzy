@@ -2,7 +2,15 @@
   command = "npm run build"
   publish = "dist"
 
+# Redirect root to login page
+[[redirects]]
+  from = "/"
+  to = "/login.html"
+  status = 200
+
+# Only redirect unknown routes to index.html (for SPA routing)
+# This won't affect actual HTML files like login.html, team.html, etc.
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200
+  status = 404
