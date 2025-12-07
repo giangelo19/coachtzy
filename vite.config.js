@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
-import { copyFileSync, mkdirSync } from 'fs'
+import { copyFileSync, mkdirSync, readdirSync, statSync } from 'fs'
+import { join } from 'path'
 
 export default defineConfig({
   root: 'public',
@@ -26,15 +27,45 @@ export default defineConfig({
     {
       name: 'copy-assets',
       closeBundle() {
-        // Ensure assets directory exists
         try {
-          mkdirSync(resolve(__dirname, 'dist/assets'), { recursive: true });
-          // Copy default_pfp.png without hash
+          const distAssets = resolve(__dirname, 'dist/assets');
+          mkdirSync(distAssets, { recursive: true });
+          
+          // Copy default_pfp.png
           copyFileSync(
             resolve(__dirname, 'public/assets/default_pfp.png'),
-            resolve(__dirname, 'dist/assets/default_pfp.png')
+            join(distAssets, 'default_pfp.png')
           );
-          console.log('✓ Copied default_pfp.png to dist/assets');
+          console.log('✓ Copied default_pfp.png');
+          
+          // Copy lane/role icons
+          const roleIcons = ['jungle.png', 'midLane.png', 'goldLane.png', 'expLane.png', 'roam.png'];
+          roleIcons.forEach(icon => {
+            const src = resolve(__dirname, 'public/assets', icon);
+            const dest = join(distAssets, icon);
+            try {
+              copyFileSync(src, dest);
+            } catch (e) {
+              console.warn(`Could not copy ${icon}`);
+            }
+          });
+          console.log('✓ Copied role icons');
+          
+          // Copy heroes folder
+          const heroesDir = resolve(__dirname, 'public/assets/heroes');
+          const distHeroesDir = join(distAssets, 'heroes');
+          mkdirSync(distHeroesDir, { recursive: true });
+          
+          const heroFiles = readdirSync(heroesDir);
+          heroFiles.forEach(file => {
+            const src = join(heroesDir, file);
+            const dest = join(distHeroesDir, file);
+            if (statSync(src).isFile()) {
+              copyFileSync(src, dest);
+            }
+          });
+          console.log(`✓ Copied ${heroFiles.length} hero icons`);
+          
         } catch (err) {
           console.error('Error copying assets:', err);
         }
