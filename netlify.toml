@@ -6,7 +6,8 @@
 [[redirects]]
   from = "/"
   to = "/login.html"
-  status = 200
+  status = 302
+  force = true
 
 # Only redirect unknown routes to index.html (for SPA routing)
 # This won't affect actual HTML files like login.html, team.html, etc.
