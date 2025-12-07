@@ -477,7 +477,7 @@ async function resetDraft() {
   // Update UI
   updateDraftStatus();
   updateCounters();
-  renderHeroes();
+  renderHeroes(allHeroes);
   
   document.getElementById('undoBtn').disabled = true;
 }
