@@ -87,6 +87,7 @@ export const playersAPI = {
           team:teams(*),
           player_heroes(
             id,
+            hero_id,
             games_played,
             wins,
             losses,
@@ -149,6 +150,11 @@ export const playersAPI = {
   // Update player
   async update(id, playerData) {
     try {
+      // Log the auth status before update
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('Session before update:', session ? 'Active' : 'None')
+      console.log('Session user:', session?.user?.id)
+      
       const { data, error } = await supabase
         .from('players')
         .update(playerData)
@@ -156,7 +162,13 @@ export const playersAPI = {
         .select()
         .single()
       
-      if (error) throw error
+      if (error) {
+        console.error('Full error object:', error)
+        console.error('Error code:', error.code)
+        console.error('Error details:', error.details)
+        console.error('Error hint:', error.hint)
+        throw error
+      }
       return data
     } catch (error) {
       console.error('Error updating player:', error.message)
@@ -215,13 +227,17 @@ export const playersAPI = {
   // Remove hero from player
   async removeHero(playerId, heroId) {
     try {
+      console.log('Removing hero - playerId:', playerId, 'heroId:', heroId)
       const { error } = await supabase
         .from('player_heroes')
         .delete()
         .eq('player_id', playerId)
         .eq('hero_id', heroId)
       
-      if (error) throw error
+      if (error) {
+        console.error('Full delete error:', error)
+        throw error
+      }
     } catch (error) {
       console.error('Error removing hero from player:', error.message)
       throw error

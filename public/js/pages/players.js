@@ -740,6 +740,13 @@ async function handleEditPlayer(form) {
         btnText.style.display = 'none';
         btnLoading.style.display = 'flex';
 
+        // Verify authentication first
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            throw new Error('Authentication required. Please log in again.');
+        }
+        console.log('User authenticated:', user.id);
+
         const playerId = document.getElementById('editPlayerId').value;
         const formData = new FormData(form);
         const playerData = {
@@ -767,13 +774,20 @@ async function handleEditPlayer(form) {
         
         // Get current player heroes
         const player = await playersAPI.getById(playerId);
+        console.log('Player fetched:', player);
+        console.log('Player heroes:', player.player_heroes);
         const currentHeroIds = player.player_heroes ? player.player_heroes.map(ph => ph.hero_id) : [];
         const newHeroIds = selectedHeroes.map(h => h.id);
         
+        console.log('Current hero IDs:', currentHeroIds);
+        console.log('New hero IDs:', newHeroIds);
+        
         // Remove heroes that are no longer selected
         for (const ph of (player.player_heroes || [])) {
+            console.log('Checking player_hero:', ph);
             if (!newHeroIds.includes(ph.hero_id)) {
-                await playersAPI.removeHero(ph.id);
+                console.log('Removing hero:', ph.hero_id);
+                await playersAPI.removeHero(playerId, ph.hero_id);
             }
         }
         
