@@ -147,50 +147,18 @@
             <form class="profile-form">
               <div class="form-row">
                 <div class="form-group">
-                  <label for="displayName">Display Name</label>
-                  <input type="text" id="displayName" value="Coach L8zn" placeholder="Enter your display name" />
+                  <label for="username">Username *</label>
+                  <input type="text" id="username" placeholder="Enter username" required />
                 </div>
                 <div class="form-group">
-                  <label for="username">Username</label>
-                  <input type="text" id="username" value="coach_l8zn" placeholder="Enter username" />
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="email">Email Address</label>
-                  <input type="email" id="email" value="coach@coachtzy.com" placeholder="Enter email address" />
-                </div>
-                <div class="form-group">
-                  <label for="phone">Phone Number</label>
-                  <input type="tel" id="phone" value="+63 912 345 6789" placeholder="Enter phone number" />
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="role">Role</label>
-                  <select id="role">
-                    <option value="coach" selected>Coach</option>
-                    <option value="analyst">Analyst</option>
-                    <option value="manager">Manager</option>
-                    <option value="player">Player</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="experience">Experience Level</label>
-                  <select id="experience">
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced" selected>Advanced</option>
-                    <option value="professional">Professional</option>
-                  </select>
+                  <label for="email">Email Address *</label>
+                  <input type="email" id="email" placeholder="Enter email address" readonly disabled />
                 </div>
               </div>
 
               <div class="form-group">
                 <label for="bio">Bio</label>
-                <textarea id="bio" rows="4" placeholder="Tell us about yourself...">Experienced MLBB coach with 3+ years of competitive experience. Specializing in draft strategy and team coordination.</textarea>
+                <textarea id="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
               </div>
             </form>
           </div>
@@ -251,82 +219,11 @@
             </form>
           </div>
 
-          <!-- Preferences Card -->
-          <div class="card preferences-card">
-            <h2>Preferences</h2>
-            <form class="profile-form">
-              <div class="preference-item">
-                <div class="preference-info">
-                  <label>Email Notifications</label>
-                  <p class="preference-description">Receive email updates about your team and matches</p>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" checked />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div class="preference-item">
-                <div class="preference-info">
-                  <label>Match Reminders</label>
-                  <p class="preference-description">Get notified before upcoming matches</p>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" checked />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div class="preference-item">
-                <div class="preference-info">
-                  <label>Performance Reports</label>
-                  <p class="preference-description">Receive weekly performance summaries</p>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div class="preference-item">
-                <div class="preference-info">
-                  <label>Draft Alerts</label>
-                  <p class="preference-description">Notifications for draft phase changes</p>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" checked />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div class="form-group">
-                <label for="timezone">Timezone</label>
-                <select id="timezone">
-                  <option value="UTC+8" selected>Philippines (UTC+8)</option>
-                  <option value="UTC+7">Thailand (UTC+7)</option>
-                  <option value="UTC+9">Japan (UTC+9)</option>
-                  <option value="UTC-5">US Eastern (UTC-5)</option>
-                  <option value="UTC-8">US Pacific (UTC-8)</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="language">Language</label>
-                <select id="language">
-                  <option value="en" selected>English</option>
-                  <option value="fil">Filipino</option>
-                  <option value="th">Thai</option>
-                  <option value="id">Indonesian</option>
-                </select>
-              </div>
-            </form>
-          </div>
-
         </div>
 
         <!-- Action Buttons -->
         <div class="profile-actions">
-          <button class="btn-primary btn-save">
+          <button class="btn-primary btn-save" id="saveProfileBtn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
@@ -338,13 +235,6 @@
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
             Cancel
-          </button>
-          <button class="btn-danger btn-delete">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-            Delete Account
           </button>
         </div>
       </main>

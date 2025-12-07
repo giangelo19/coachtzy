@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentUser = await getCurrentUser();
     
     // Load profile data into form
-    loadProfileData(currentUser);
+    await loadProfileData();
     
     // Setup event listeners
     setupEventListeners();
@@ -22,45 +22,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-function loadProfileData(user) {
-  if (!user) return;
-
-  // Update header user info
-  updateUserProfile(user);
-
-  // Personal Information
-  const usernameInput = document.getElementById('username');
-  const emailInput = document.getElementById('email');
-  const phoneInput = document.getElementById('phone');
-  const bioTextarea = document.getElementById('bio');
-  const experienceSelect = document.getElementById('experience');
-
-  if (usernameInput) usernameInput.value = user.username || '';
-  if (emailInput) emailInput.value = user.email || '';
-  if (phoneInput) phoneInput.value = user.phone_number || '';
-  if (bioTextarea) bioTextarea.value = user.bio || '';
-  if (experienceSelect) experienceSelect.value = user.experience_level || '';
-
-  // Profile picture
-  const profilePicture = document.querySelector('.profile-picture-preview');
-  if (profilePicture && user.profile_picture) {
-    profilePicture.src = user.profile_picture;
+async function loadProfileData() {
+  try {
+    const user = await getCurrentUser();
+    
+    if (!user) {
+      console.error('No user found');
+      return;
+    }
+    
+    // Get user metadata from auth
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    
+    // Get user profile from coaches table
+    const { data: coach, error } = await supabase
+      .from('coaches')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    
+    if (error) {
+      console.error('Error loading coach profile:', error);
+      return;
+    }
+    
+    console.log('Loaded coach data:', coach);
+    
+    // Populate form fields
+    document.getElementById('username').value = coach.username || '';
+    document.getElementById('email').value = authUser.email || '';
+    document.getElementById('bio').value = coach.bio || '';
+    
+    // Set profile picture
+    if (coach.profile_picture) {
+      document.getElementById('profilePreview').src = coach.profile_picture;
+    }
+    
+  } catch (error) {
+    console.error('Error loading user data:', error);
+    showNotification('Failed to load profile data', 'error');
   }
-
-  // Preferences
-  const timezoneSelect = document.getElementById('timezone');
-  const languageSelect = document.getElementById('language');
-  const emailNotifications = document.getElementById('emailNotifications');
-  const matchReminders = document.getElementById('matchReminders');
-  const performanceReports = document.getElementById('performanceReports');
-  const draftAlerts = document.getElementById('draftAlerts');
-
-  if (timezoneSelect) timezoneSelect.value = user.timezone || 'UTC';
-  if (languageSelect) languageSelect.value = user.language || 'en';
-  if (emailNotifications) emailNotifications.checked = user.email_notifications !== false;
-  if (matchReminders) matchReminders.checked = user.match_reminders !== false;
-  if (performanceReports) performanceReports.checked = user.performance_reports !== false;
-  if (draftAlerts) draftAlerts.checked = user.draft_alerts !== false;
 }
 
 function updateUserProfile(user) {
@@ -74,6 +75,39 @@ function updateUserProfile(user) {
   if (user?.email) {
     coachEmailElements.forEach(el => el.textContent = user.email);
   }
+}
+
+function showNotification(message, type = 'success') {
+  // Remove any existing notifications
+  const existingNotification = document.querySelector('.notification-message');
+  if (existingNotification) {
+    existingNotification.remove();
+  }
+
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `notification-message ${type}`;
+  notification.textContent = message;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    background: ${type === 'success' ? '#4CAF50' : '#f44336'};
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+  `;
+
+  document.body.appendChild(notification);
+
+  // Auto remove after 3 seconds
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
 }
 
 function setupEventListeners() {
@@ -97,26 +131,21 @@ function setupEventListeners() {
   const fileInput = document.getElementById('profilePictureInput');
   
   if (uploadBtn && fileInput) {
-    uploadBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', handleProfilePictureUpload);
+    uploadBtn.addEventListener('click', () => {
+      showNotification('Profile picture upload feature coming soon!', 'info');
+    });
   }
 
-  // Personal Information form
-  const personalInfoForm = document.querySelector('.personal-info-form');
-  if (personalInfoForm) {
-    personalInfoForm.addEventListener('submit', handlePersonalInfoSave);
+  // Remove photo button
+  const removePhotoBtn = document.querySelector('.btn-remove');
+  if (removePhotoBtn) {
+    removePhotoBtn.addEventListener('click', handleRemovePhoto);
   }
 
-  // Password change form
-  const passwordForm = document.querySelector('.password-form');
-  if (passwordForm) {
-    passwordForm.addEventListener('submit', handlePasswordChange);
-  }
-
-  // Preferences form
-  const preferencesForm = document.querySelector('.preferences-form');
-  if (preferencesForm) {
-    preferencesForm.addEventListener('submit', handlePreferencesSave);
+  // Save profile button (handles both profile and password changes)
+  const saveProfileBtn = document.getElementById('saveProfileBtn');
+  if (saveProfileBtn) {
+    saveProfileBtn.addEventListener('click', handleSaveAll);
   }
 
   // Logout button
@@ -131,174 +160,125 @@ function setupEventListeners() {
   }
 }
 
-async function handleProfilePictureUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  // Validate file
-  if (!file.type.startsWith('image/')) {
-    alert('Please select an image file');
-    return;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    alert('File size must be less than 5MB');
-    return;
-  }
-
+async function handleRemovePhoto() {
   try {
-    // Show loading
-    const uploadBtn = document.querySelector('.upload-btn');
-    if (uploadBtn) uploadBtn.textContent = 'Uploading...';
-
-    // Upload to Supabase Storage
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
-    const filePath = `profile-pictures/${fileName}`;
-
-    const { data, error } = await supabase.storage
-      .from('profile-pictures')
-      .upload(filePath, file);
+    const user = await getCurrentUser();
+    
+    // Update to default avatar in database
+    const { error } = await supabase
+      .from('coaches')
+      .update({ profile_picture: null })
+      .eq('id', user.id);
 
     if (error) throw error;
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('profile-pictures')
-      .getPublicUrl(filePath);
-
-    // Update profile in database
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ profile_picture: publicUrl })
-      .eq('id', currentUser.id);
-
-    if (updateError) throw updateError;
-
-    // Update UI
+    // Update UI with default avatar
     const profilePicture = document.querySelector('.profile-picture-preview');
-    if (profilePicture) profilePicture.src = publicUrl;
+    if (profilePicture) {
+      profilePicture.src = '/assets/default-avatar.png';
+    }
 
-    alert('Profile picture updated successfully!');
-    
-    if (uploadBtn) uploadBtn.textContent = 'Upload New Photo';
+    showNotification('Profile picture removed successfully!', 'success');
   } catch (error) {
-    console.error('Error uploading profile picture:', error);
-    alert('Failed to upload profile picture. Please try again.');
-    const uploadBtn = document.querySelector('.upload-btn');
-    if (uploadBtn) uploadBtn.textContent = 'Upload New Photo';
+    console.error('Error removing profile picture:', error);
+    showNotification('Failed to remove profile picture. Please try again.', 'error');
   }
 }
 
-async function handlePersonalInfoSave(event) {
-  event.preventDefault();
-
-  const formData = new FormData(event.target);
-  const updates = {
-    username: formData.get('username'),
-    phone_number: formData.get('phone'),
-    bio: formData.get('bio'),
-    experience_level: formData.get('experience')
-  };
-
+async function handleSaveAll() {
   try {
-    const saveBtn = event.target.querySelector('button[type="submit"]');
-    if (saveBtn) saveBtn.textContent = 'Saving...';
-
-    const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', currentUser.id);
-
-    if (error) throw error;
-
-    alert('Profile updated successfully!');
+    const user = await getCurrentUser();
     
-    // Reload user data
-    currentUser = await getCurrentUser();
-    updateUserProfile(currentUser);
+    // Get form values
+    const username = document.getElementById('username').value.trim();
+    const bio = document.getElementById('bio').value.trim();
+    const newPassword = document.getElementById('newPassword')?.value;
+    const confirmPassword = document.getElementById('confirmPassword')?.value;
 
-    if (saveBtn) saveBtn.textContent = 'Save Changes';
+    // Validate username
+    if (!username) {
+      showNotification('Username is required', 'error');
+      return;
+    }
+
+    if (username.length < 3) {
+      showNotification('Username must be at least 3 characters', 'error');
+      return;
+    }
+
+    // Validate password if provided
+    if (newPassword || confirmPassword) {
+      if (newPassword !== confirmPassword) {
+        showNotification('New passwords do not match', 'error');
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        showNotification('Password must be at least 6 characters', 'error');
+        return;
+      }
+    }
+
+    const saveBtn = document.getElementById('saveProfileBtn');
+    if (saveBtn) {
+      saveBtn.textContent = 'Saving...';
+      saveBtn.disabled = true;
+    }
+
+    // Update profile in coaches table
+    const { error: profileError } = await supabase
+      .from('coaches')
+      .update({
+        username: username,
+        bio: bio
+      })
+      .eq('id', user.id);
+
+    if (profileError) throw profileError;
+
+    // Update password if provided
+    if (newPassword) {
+      const { error: passwordError } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (passwordError) throw passwordError;
+
+      // Clear password fields after successful update
+      if (document.getElementById('currentPassword')) document.getElementById('currentPassword').value = '';
+      if (document.getElementById('newPassword')) document.getElementById('newPassword').value = '';
+      if (document.getElementById('confirmPassword')) document.getElementById('confirmPassword').value = '';
+    }
+
+    showNotification('Profile updated successfully!', 'success');
+    
+    // Update UI elements with new username
+    updateUserProfile({ username, email: user.email });
+
+    if (saveBtn) {
+      saveBtn.textContent = 'Save Changes';
+      saveBtn.disabled = false;
+    }
   } catch (error) {
     console.error('Error saving profile:', error);
-    alert('Failed to save profile. Please try again.');
-    const saveBtn = event.target.querySelector('button[type="submit"]');
-    if (saveBtn) saveBtn.textContent = 'Save Changes';
+    showNotification('Failed to save profile. Please try again.', 'error');
+    
+    const saveBtn = document.getElementById('saveProfileBtn');
+    if (saveBtn) {
+      saveBtn.textContent = 'Save Changes';
+      saveBtn.disabled = false;
+    }
   }
 }
 
-async function handlePasswordChange(event) {
-  event.preventDefault();
-
-  const formData = new FormData(event.target);
-  const currentPassword = formData.get('currentPassword');
-  const newPassword = formData.get('newPassword');
-  const confirmPassword = formData.get('confirmPassword');
-
-  // Validate
-  if (newPassword !== confirmPassword) {
-    alert('New passwords do not match');
-    return;
-  }
-
-  if (newPassword.length < 6) {
-    alert('Password must be at least 6 characters');
-    return;
-  }
-
-  try {
-    const saveBtn = event.target.querySelector('button[type="submit"]');
-    if (saveBtn) saveBtn.textContent = 'Changing...';
-
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword
-    });
-
-    if (error) throw error;
-
-    alert('Password changed successfully!');
-    event.target.reset();
-
-    if (saveBtn) saveBtn.textContent = 'Change Password';
-  } catch (error) {
-    console.error('Error changing password:', error);
-    alert('Failed to change password. Please try again.');
-    const saveBtn = event.target.querySelector('button[type="submit"]');
-    if (saveBtn) saveBtn.textContent = 'Change Password';
-  }
-}
-
-async function handlePreferencesSave(event) {
-  event.preventDefault();
-
-  const formData = new FormData(event.target);
-  const updates = {
-    timezone: formData.get('timezone'),
-    language: formData.get('language'),
-    email_notifications: formData.get('emailNotifications') === 'on',
-    match_reminders: formData.get('matchReminders') === 'on',
-    performance_reports: formData.get('performanceReports') === 'on',
-    draft_alerts: formData.get('draftAlerts') === 'on'
-  };
-
-  try {
-    const saveBtn = event.target.querySelector('button[type="submit"]');
-    if (saveBtn) saveBtn.textContent = 'Saving...';
-
-    const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', currentUser.id);
-
-    if (error) throw error;
-
-    alert('Preferences updated successfully!');
-
-    if (saveBtn) saveBtn.textContent = 'Save Preferences';
-  } catch (error) {
-    console.error('Error saving preferences:', error);
-    alert('Failed to save preferences. Please try again.');
-    const saveBtn = event.target.querySelector('button[type="submit"]');
-    if (saveBtn) saveBtn.textContent = 'Save Preferences';
+// Password toggle visibility function
+window.togglePassword = function(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+  } else {
+    input.type = 'password';
   }
 }

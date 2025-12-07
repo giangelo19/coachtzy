@@ -6199,3 +6199,30 @@ body.login-page {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+/* Notification Styles */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.notification-message {
+  font-size: 14px;
+  font-weight: 500;
+}
